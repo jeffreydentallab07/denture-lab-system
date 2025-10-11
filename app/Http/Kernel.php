@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\ValidatePathEncoding::class,
+        'clinic' => \App\Http\Middleware\ClinicMiddleware::class,
     ];
 
     /**
@@ -53,18 +54,18 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,    
+        'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.admin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
-        'auth:technician' => \App\Http\Middleware\Authenticate::class, 
-        'auth:rider' => \App\Http\Middleware\Authenticate::class,   
-        'auth:clinic' => \App\Http\Middleware\Authenticate::class,    
+        'auth:technician' => \App\Http\Middleware\Authenticate::class,
+        'auth:rider' => \App\Http\Middleware\Authenticate::class,
+        'auth:clinic' => \App\Http\Middleware\Authenticate::class,
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-    'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
 
     ];
 }

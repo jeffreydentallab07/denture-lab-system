@@ -36,14 +36,14 @@ class DashboardController extends Controller
         $finishedAppointments = Appointment::where('work_status', 'finished')->get();
 
         // Merge notifications
-        $notifications = $newCaseOrders->map(function($order){
+        $notifications = $newCaseOrders->map(function ($order) {
             return [
                 'type' => 'New Case Order',
                 'message' => "Case #{$order->id} created",
                 'link' => route('case-orders.show', $order->id)
             ];
         })->merge(
-            $finishedAppointments->map(function($appointment){
+            $finishedAppointments->map(function ($appointment) {
                 return [
                     'type' => 'Appointment Finished',
                     'message' => "Appointment #{$appointment->appointment_id} is finished",

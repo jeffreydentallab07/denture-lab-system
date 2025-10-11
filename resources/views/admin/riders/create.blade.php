@@ -39,19 +39,19 @@
                 @forelse($riders as $rider)
                 <tr class="bg-white hover:bg-gray-50">
                     <td class="px-6 py-3">
-                        <img src="{{ $rider->photo ? asset('storage/' . $rider->photo) : asset('images/default-avatar.png') }}" 
-                             alt="{{ $rider->name }}" class="w-12 h-12 object-cover rounded-full mx-auto">
+                        <img src="{{ $rider->photo ? asset('storage/' . $rider->photo) : asset('images/default-avatar.png') }}"
+                            alt="{{ $rider->name }}" class="w-12 h-12 object-cover rounded-full mx-auto">
                     </td>
                     <td class="px-6 py-3 font-semibold text-gray-800">{{ $rider->name }}</td>
                     <td class="px-6 py-3 font-semibold text-gray-800">{{ $rider->email }}</td>
                     <td class="px-6 py-3 font-semibold text-gray-800">{{ $rider->contact_number ?? 'N/A' }}</td>
                     <td class="px-6 py-3 flex gap-2">
-                        <button 
-                            onclick="openEditRiderModal({{ $rider->id }}, '{{ addslashes($rider->name) }}', '{{ $rider->contact_number ?? '' }}', '{{ addslashes($rider->email) }}', '{{ $rider->photo ?? '' }}')" 
+                        <button
+                            onclick="openEditRiderModal({{ $rider->id }}, '{{ addslashes($rider->name) }}', '{{ $rider->contact_number ?? '' }}', '{{ addslashes($rider->email) }}', '{{ $rider->photo ?? '' }}')"
                             class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                             Edit
                         </button>
-                        <form action="{{ route('riders.destroy', $rider->id) }}" method="POST"
+                        <form action="{{ route('admin.riders.destroy', $rider->id) }}" method="POST"
                             onsubmit="return confirm('Are you sure you want to delete this rider?');">
                             @csrf
                             @method('DELETE')
@@ -69,39 +69,47 @@
     </div>
 
     <!-- Add Rider Modal -->
-    <div id="addRiderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div id="addRiderModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
-            <button id="closeAddRiderModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <button id="closeAddRiderModal"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
             <h2 class="text-xl font-bold mb-4">Add Rider</h2>
-            <form action="{{ route('riders.store') }}" method="POST" id="riderFormModal" class="space-y-6">
+            <form action="{{ route('admin.riders.store') }}" method="POST" id="riderFormModal" class="space-y-6">
                 @csrf
                 <div>
                     <label class="block font-medium mb-1">Full Name <span class="text-red-500">*</span></label>
                     <input type="text" name="f_name" id="f_name_modal" value="{{ old('f_name') }}"
                         pattern="^[A-Za-z\s.\-]+$" required
                         class="w-full border-b border-gray-300 p-2 focus:outline-none focus:border-[#189ab4] bg-transparent">
-                    <small id="nameError_modal" class="text-red-500 text-sm hidden">Name can only contain letters, spaces, dots, and hyphens.</small>
+                    <small id="nameError_modal" class="text-red-500 text-sm hidden">Name can only contain letters,
+                        spaces, dots, and hyphens.</small>
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Contact Number <span class="text-red-500">*</span></label>
                     <div class="flex">
-                        <span class="px-3 py-2 bg-gray-100 border-b border-gray-300 text-gray-600 select-none">+63</span>
-                        <input type="text" name="contact_number" id="contact_number_modal" value="{{ old('contact_number') }}"
-                            pattern="^[0-9]{10}$" required
+                        <span
+                            class="px-3 py-2 bg-gray-100 border-b border-gray-300 text-gray-600 select-none">+63</span>
+                        <input type="text" name="contact_number" id="contact_number_modal"
+                            value="{{ old('contact_number') }}" pattern="^[0-9]{10}$" required
                             class="flex-1 border-b border-gray-300 p-2 focus:outline-none bg-transparent"
                             placeholder="9123456789">
                     </div>
-                    <small id="contactError_modal" class="text-red-500 text-sm hidden">Must be 10 digits after +63.</small>
+                    <small id="contactError_modal" class="text-red-500 text-sm hidden">Must be 10 digits after
+                        +63.</small>
                 </div>
                 <div>
                     <label class="block font-medium mb-1">Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" id="email_modal" value="{{ old('email') }}"
                         pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required
                         class="w-full border-b border-gray-300 p-2 focus:outline-none focus:border-[#189ab4] bg-transparent">
-                    <small id="emailError_modal" class="text-red-500 text-sm hidden">Email must be a valid Gmail address.</small>
+                    <small id="emailError_modal" class="text-red-500 text-sm hidden">Email must be a valid Gmail
+                        address.</small>
                 </div>
                 <div class="flex items-center gap-4 mt-4">
-                    <button type="submit" class="bg-[#189ab4] text-white px-5 py-2 rounded hover:bg-[#127a95] font-semibold transition">Add Rider</button>
+                    <button type="submit"
+                        class="bg-[#189ab4] text-white px-5 py-2 rounded hover:bg-[#127a95] font-semibold transition">Add
+                        Rider</button>
                     <button type="button" id="cancelAddRider" class="text-gray-600 hover:underline">Cancel</button>
                 </div>
             </form>
@@ -111,7 +119,7 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
     const addModal = document.getElementById('addRiderModal');
     document.getElementById('openAddRiderModal').addEventListener('click', () => addModal.classList.remove('hidden'));
     document.getElementById('closeAddRiderModal').addEventListener('click', () => addModal.classList.add('hidden'));
@@ -157,14 +165,28 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
-.animate-shake {
-    animation: shake 0.3s;
-}
-@keyframes shake {
-    0%,100%{transform:translateX(0);}
-    25%{transform:translateX(-4px);}
-    50%{transform:translateX(4px);}
-    75%{transform:translateX(-4px);}
-}
+    .animate-shake {
+        animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-4px);
+        }
+
+        50% {
+            transform: translateX(4px);
+        }
+
+        75% {
+            transform: translateX(-4px);
+        }
+    }
 </style>
 @endsection

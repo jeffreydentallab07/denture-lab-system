@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\DB;
+
+use App\Models\Appointment;
 
 class MainController extends Controller
 {
@@ -17,21 +18,12 @@ class MainController extends Controller
 
     public function appointments()
     {
-        $appointments = DB::table('appointments')
-            ->join('case_orders', 'appointments.co_id', '=', 'case_orders.co_id')
-            ->join('materials', 'appointments.material_id', '=', 'materials.material_id')
-            ->join('departments', 'appointments.dept_id', '=', 'departments.dept_id')
-            ->join('technicians', 'appointments.tech_id', '=', 'technicians.tech_id')
-            ->select(
-                'appointments.*',
-                'case_orders.co_id',
-                'materials.name as material',
-                'departments.name as department',
-                'technicians.name as technician'
-            )
-            ->get();
+        $appointments = Appointment::with([
+            'caseOrder',
+            'material',
+            'technician'
+        ])->get();
+
         return view('appointments', compact('appointments'));
     }
-
-    
 }

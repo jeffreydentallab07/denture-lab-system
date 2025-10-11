@@ -9,17 +9,12 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    protected $table = 'tbl_appointment';
     protected $primaryKey = 'appointment_id';
-    
-    public $timestamps = false;
-    
+
     protected $fillable = [
-        'co_id',
+        'case_order_id',
         'technician_id',
         'schedule_datetime',
-        'material_id',
-        'priority_level',
         'purpose',
         'work_status',
     ];
@@ -28,73 +23,36 @@ class Appointment extends Model
         'schedule_datetime' => 'datetime',
     ];
 
-    // Existing relationships (huwag baguhin)
-    public function material()
-{
-    return $this->belongsTo(Material::class, 'material_id', 'material_id');
-}
+    // Relationships
+    public function caseOrder()
+    {
+        return $this->belongsTo(CaseOrder::class, 'case_order_id', 'co_id');
+    }
 
     public function technician()
     {
         return $this->belongsTo(User::class, 'technician_id', 'id');
     }
 
-    public function caseOrder()
-{
-    return $this->belongsTo(CaseOrder::class, 'co_id', 'co_id');
-}
-   public function delivery()
-{
-    return $this->hasOne(Delivery::class, 'appointment_id', 'appointment_id');
-}
-
+    public function delivery()
+    {
+        return $this->hasOne(Delivery::class, 'appointment_id', 'appointment_id');
+    }
     public function billing()
     {
         return $this->hasOne(Billing::class, 'appointment_id', 'appointment_id');
     }
 
-    // BAGONG ADDITION: Indirect relationship to Patient via CaseOrder
-    public function patient()
+    public function materialUsages()
     {
-        return $this->belongsToThrough(
-            Patient::class,  // Target model (Patient)
-            CaseOrder::class,  // Intermediate model (CaseOrder)
-            'co_id',  // Foreign key sa Appointment (co_id → CaseOrder.co_id)
-            'patient_id',  // Foreign key sa CaseOrder (CaseOrder.patient_id → Patient.patient_id)
-            'co_id',  // Local key sa Appointment (co_id)
-            'co_id'  // Local key sa CaseOrder (co_id)
-        );
+        return $this->hasMany(MaterialUsage::class, 'appointment_id', 'appointment_id');
     }
 
-    // Helper method para sa patient name (optional, para madaling i-access)
-   // Appointment.php
-public function getPatientNameAttribute()
-{
-    return $this->caseOrder && $this->caseOrder->patient
-        ? $this->caseOrder->patient->patient_name
-        : 'N/A';
-}
-
-
-    // Iba pang helper methods (huwag baguhin)
-    public function getMaterialNameAttribute()
+    // Get total material cost for this appointment
+    public function getTotalMaterialCostAttribute()
     {
-        return $this->material ? $this->material->material_name : 'Not Selected';
+        return $this->materialUsages->sum(function ($usage) {
+            return $usage->quantity_used * $usage->material->price;
+        });
     }
-
-    public function getIsActiveAttribute()
-    {
-        return in_array($this->work_status, ['pending', 'in progress']);
-    }
-
-    public function scopeFinished($query)
-    {
-        return $query->where('work_status', 'finished');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->whereIn('work_status', ['pending', 'in progress']);
-    }
-    
 }

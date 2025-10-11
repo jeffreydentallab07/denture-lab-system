@@ -1,198 +1,365 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="utf-8">
-    <title>{{ ucfirst($type) }} Reports - From {{ $from }} to {{ $to }}</title>
+    <meta charset="UTF-8">
+    <title>{{ ucfirst(str_replace('-', ' ', $reportType)) }} Report</title>
     <style>
-        @page {
-            margin: 1in;
-            size: A4;
-        }
         body {
-            font-family: DejaVu Sans, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 12px;
             line-height: 1.4;
             color: #333;
-            margin: 0;
-            padding: 20px;
-            background: #fff;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #1e40af;
+            padding-bottom: 15px;
         }
+
         .header h1 {
+            color: #1e40af;
             margin: 0;
-            color: #007bff;
-            font-size: 18px;
+            font-size: 24px;
         }
+
         .header p {
-            margin: 5px 0 0;
-            font-size: 11px;
             color: #666;
+            margin: 5px 0;
         }
-        .report-title {
-            text-align: center;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #333;
-            text-transform: capitalize;
+
+        .info-box {
+            background: #f3f4f6;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
-        .date-range {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #666;
-            font-style: italic;
-        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            border: 1px solid #ddd;
+            margin-bottom: 20px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px 10px;
-            text-align: left;
-            vertical-align: top;
-        }
+
         th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-            text-transform: uppercase;
+            background: #1e40af;
+            color: white;
+            padding: 10px;
+            text-align: left;
             font-size: 11px;
+            text-transform: uppercase;
         }
-        tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
         }
-        .no-data {
-            text-align: center;
-            padding: 40px;
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .summary-box {
+            background: #eff6ff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1e40af;
+        }
+
+        .summary-box h3 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
             color: #666;
-            font-style: italic;
         }
+
+        .stat-value {
+            font-weight: bold;
+            color: #1e40af;
+        }
+
         .footer {
-            margin-top: 40px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
             text-align: center;
             font-size: 10px;
             color: #999;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #ddd;
             padding-top: 10px;
         }
-        .details {
-            font-size: 11px;
+
+        .page-break {
+            page-break-after: always;
         }
-        .date {
-            font-size: 11px;
-            color: #666;
-            white-space: nowrap;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-        .status-completed { background-color: #d4edda; color: #155724; }
-        .status-cancelled { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
+
 <body>
+    <!-- Header -->
     <div class="header">
-        <h1>Your Clinic Management System</h1>
-        <p>Generated on {{ now()->format('Y-m-d H:i:s') }} | {{ ucfirst($type) }} Report</p>
+        <h1>{{ ucfirst(str_replace('-', ' ', $reportType)) }} Report</h1>
+        <p>Jeffrey Dental Lab Management System</p>
+        <p>Report Period: {{ \Carbon\Carbon::parse($dateFrom)->format('M d, Y') }} - {{
+            \Carbon\Carbon::parse($dateTo)->format('M d, Y') }}</p>
+        <p>Generated: {{ $generatedAt }}</p>
     </div>
 
-    <h2 class="report-title">{{ ucfirst($type) }} Reports</h2>
-    <p class="date-range">Date Range: {{ $from }} to {{ $to }}</p>
+    <!-- Report Content -->
+    @if($reportType === 'overview')
+    <div class="summary-box">
+        <h3>Case Orders Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Cases:</span>
+            <span class="stat-value">{{ $data['total_case_orders'] }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Completed:</span>
+            <span class="stat-value">{{ $data['completed_cases'] }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Pending:</span>
+            <span class="stat-value">{{ $data['pending_cases'] }}</span>
+        </div>
+    </div>
 
-    @if($reports->count() > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>ID</th>
-                    <th>Patient Details</th>
-                    <th>Status</th>
-                    <th>Date & Time</th>
-                    @if($type === 'appointments')
-                        <th>Dentist</th>
-                    @elseif($type === 'deliveries')
-                        <th>Rider</th>
-                    @elseif($type === 'billing')
-                        <th>Amount</th>
-                    @endif
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($reports as $report)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $report->id ?? 'N/A' }}</td>
-                        <td class="details">
-                            @if($type === 'appointments' && isset($report->patient))
-                                {{ $report->patient->name ?? 'N/A' }}<br>
-                                <small>{{ $report->patient->contact ?? '' }}</small>
-                            @elseif($type === 'deliveries' && isset($report->patient))
-                                {{ $report->patient->name ?? 'N/A' }}
-                            @elseif($type === 'billing' && isset($report->patient))
-                                {{ $report->patient->name ?? 'N/A' }}
-                            @elseif($type === 'caseorder' && isset($report->patient))
-                                {{ $report->patient->name ?? 'N/A' }}
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        <td>
-                            @if(isset($report->status))
-                                <span class="status-badge status-{{ strtolower($report->status) }}">
-                                    {{ ucfirst($report->status) }}
-                                </span>
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        <td class="date">
-                            @php
-                                $dateField = $type === 'appointments' ? 'schedule_datetime' : 'created_at';
-                                $dateValue = $report->{$dateField} ?? null;
-                            @endphp
-                            @if($dateValue)
-                                {{ \Carbon\Carbon::parse($dateValue)->format('Y-m-d H:i') }}
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        @if($type === 'appointments' && isset($report->dentist))
-                            <td>{{ $report->dentist->name ?? 'N/A' }}</td>
-                        @elseif($type === 'deliveries' && isset($report->rider))
-                            <td>{{ $report->rider->name ?? 'N/A' }}</td>
-                        @elseif($type === 'billing' && isset($report->amount))
-                            <td>${{ number_format($report->amount, 2) }}</td>
-                        @else
-                            <td></td>
-                        @endif
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        
-        <div class="footer">
-            Total {{ ucfirst($type) }} Records: {{ $reports->count() }} | 
-            Generated on {{ now()->format('Y-m-d H:i:s') }}
+    <div class="summary-box">
+        <h3>Revenue Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Revenue:</span>
+            <span class="stat-value">₱{{ number_format($data['total_revenue'], 2) }}</span>
         </div>
-    @else
-        <div class="no-data">
-            <h3>No {{ ucfirst($type) }} found</h3>
-            <p>No records found for the selected date range: {{ $from }} to {{ $to }}</p>
+        <div class="stat-row">
+            <span class="stat-label">Pending Revenue:</span>
+            <span class="stat-value">₱{{ number_format($data['pending_revenue'], 2) }}</span>
         </div>
+    </div>
+
+    <div class="summary-box">
+        <h3>Operational Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Appointments:</span>
+            <span class="stat-value">{{ $data['total_appointments'] }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Total Deliveries:</span>
+            <span class="stat-value">{{ $data['total_deliveries'] }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Total Clinics:</span>
+            <span class="stat-value">{{ $data['total_clinics'] }}</span>
+        </div>
+    </div>
+
+    @elseif($reportType === 'case-orders')
+    <div class="summary-box">
+        <h3>Case Orders Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Cases in Period:</span>
+            <span class="stat-value">{{ $data['total_cases'] }}</span>
+        </div>
+    </div>
+
+    <h3>Case Orders Details</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Case No.</th>
+                <th>Clinic</th>
+                <th>Patient</th>
+                <th>Case Type</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['case_orders'] as $case)
+            <tr>
+                <td>CASE-{{ str_pad($case->co_id, 5, '0', STR_PAD_LEFT) }}</td>
+                <td>{{ $case->clinic->clinic_name }}</td>
+                <td>{{ $case->patient->name ?? 'N/A' }}</td>
+                <td>{{ $case->case_type }}</td>
+                <td>{{ ucfirst(str_replace('-', ' ', $case->status)) }}</td>
+                <td>{{ $case->created_at->format('M d, Y') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @elseif($reportType === 'revenue')
+    <div class="summary-box">
+        <h3>Revenue Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Revenue (Paid):</span>
+            <span class="stat-value">₱{{ number_format($data['total_revenue'], 2) }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Pending Payment:</span>
+            <span class="stat-value">₱{{ number_format($data['pending_revenue'], 2) }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Partial Payment:</span>
+            <span class="stat-value">₱{{ number_format($data['partial_revenue'], 2) }}</span>
+        </div>
+    </div>
+
+    <h3>Billing Records</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Billing ID</th>
+                <th>Clinic</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['billings'] as $billing)
+            <tr>
+                <td>BILL-{{ str_pad($billing->id, 5, '0', STR_PAD_LEFT) }}</td>
+                <td>{{ $billing->appointment->caseOrder->clinic->clinic_name }}</td>
+                <td>₱{{ number_format($billing->total_amount, 2) }}</td>
+                <td>{{ ucfirst($billing->payment_status) }}</td>
+                <td>{{ $billing->created_at->format('M d, Y') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @elseif($reportType === 'materials')
+    <div class="summary-box">
+        <h3>Materials Summary</h3>
+        <div class="stat-row">
+            <span class="stat-label">Total Material Cost:</span>
+            <span class="stat-value">₱{{ number_format($data['total_material_cost'], 2) }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Low/Out of Stock Materials:</span>
+            <span class="stat-value">{{ $data['low_stock_materials']->count() }}</span>
+        </div>
+    </div>
+
+    <h3>Material Usage</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Material Name</th>
+                <th>Total Used</th>
+                <th>Unit</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['material_usages'] as $usage)
+            <tr>
+                <td>{{ $usage->material_name }}</td>
+                <td>{{ $usage->total_used }}</td>
+                <td>{{ $usage->unit }}</td>
+                <td>₱{{ number_format($usage->total_cost, 2) }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @elseif($reportType === 'clinic-performance')
+    <h3>Clinic Performance Rankings</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Clinic Name</th>
+                <th>Total Orders</th>
+                <th>Completed</th>
+                <th>Completion Rate</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['clinic_stats'] as $index => $clinic)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $clinic->clinic_name }}</td>
+                <td>{{ $clinic->total_orders }}</td>
+                <td>{{ $clinic->completed_orders }}</td>
+                <td>{{ $clinic->total_orders > 0 ? number_format(($clinic->completed_orders / $clinic->total_orders *
+                    100), 1) : 0 }}%</td>
+                <td>₱{{ number_format($clinic->total_revenue, 2) }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @elseif($reportType === 'technician-performance')
+    <h3>Technician Performance Rankings</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Technician Name</th>
+                <th>Total Appointments</th>
+                <th>Completed</th>
+                <th>Completion Rate</th>
+                <th>Materials Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['technician_stats'] as $index => $technician)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $technician->name }}</td>
+                <td>{{ $technician->total_appointments }}</td>
+                <td>{{ $technician->completed_appointments }}</td>
+                <td>{{ $technician->total_appointments > 0 ? number_format(($technician->completed_appointments /
+                    $technician->total_appointments * 100), 1) : 0 }}%</td>
+                <td>{{ $technician->materials_used }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @elseif($reportType === 'delivery-performance')
+    <h3>Rider Performance Rankings</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Rider Name</th>
+                <th>Total Deliveries</th>
+                <th>Completed</th>
+                <th>Total Pickups</th>
+                <th>Completed Pickups</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['rider_stats'] as $index => $rider)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $rider->name }}</td>
+                <td>{{ $rider->total_deliveries }}</td>
+                <td>{{ $rider->completed_deliveries }}</td>
+                <td>{{ $rider->total_pickups }}</td>
+                <td>{{ $rider->completed_pickups }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
     @endif
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Jeffrey Dental Lab - Confidential Report - Page 1</p>
+    </div>
 </body>
+
 </html>

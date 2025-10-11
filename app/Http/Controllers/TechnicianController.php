@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
 
 class TechnicianController extends Controller
 {
@@ -100,7 +102,7 @@ class TechnicianController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('admin.technicians.index')->with('success', 'Technician updated successfully.');
+            return redirect()->route('technicians.index')->with('success', 'Technician updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update technician: ' . $e->getMessage());
@@ -114,7 +116,7 @@ class TechnicianController extends Controller
             DB::beginTransaction();
 
             $user = User::where('role', 'technician')->findOrFail($id);
-            
+
             // Delete associated photo if exists
             if ($user->photo && Storage::disk('public')->exists($user->photo)) {
                 Storage::disk('public')->delete($user->photo);
@@ -123,18 +125,18 @@ class TechnicianController extends Controller
             $user->delete();
 
             DB::commit();
-            return redirect()->route('admin.technicians.index')->with('success', 'Technician deleted successfully.');
+            return redirect()->route('technicians.index')->with('success', 'Technician deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to delete technician: ' . $e->getMessage());
-            return redirect()->route('admin.technicians.index')->with('error', 'Failed to delete technician.');
+            return redirect()->route('technicians.index')->with('error', 'Failed to delete technician.');
         }
     }
 
     public function dashboard()
     {
         $user = Auth::user();
-        
+
         if (!$user || $user->role !== 'technician') { // Check if user is logged in and is a technician
             abort(403, 'Unauthorized access.');
         }
@@ -146,7 +148,7 @@ class TechnicianController extends Controller
             ->get();
 
         // Load all materials to populate the dropdowns
-        $materials = Material::all(); 
+        $materials = Material::all();
 
         return view('technician.dashboard', compact('appointments', 'materials'));
     }
@@ -167,7 +169,7 @@ class TechnicianController extends Controller
         }
         if ($request->has('material_id')) {
             // material_id can be null if "Select Material" is chosen
-            $rules['material_id'] = ['nullable', 'exists:tbl_materials,material_id']; // Ensure 'tbl_materials' is your actual materials table name
+            $rules['material_id'] = ['nullable', 'exists:materials,material_id']; // Ensure 'materials' is your actual materials table name
         }
 
         // If neither field is present, it's an invalid request
@@ -175,14 +177,14 @@ class TechnicianController extends Controller
             Log::warning('No valid update fields in request', ['appointment_id' => $id, 'input' => $request->all()]);
             return redirect()->back()->with('error', 'No valid update fields provided.');
         }
-        
+
         $request->validate($rules);
 
         try {
             DB::beginTransaction();
 
             $appointment = Appointment::findOrFail($id);
-            
+
             // Ensure the appointment belongs to the authenticated technician
             if ($appointment->technician_id !== Auth::id()) {
                 Log::warning('Unauthorized technician attempted to update appointment', [
@@ -217,7 +219,7 @@ class TechnicianController extends Controller
             $appointment->save();
 
             DB::commit();
-            
+
             $successMessage = 'Appointment updated successfully!';
             if ($request->has('work_status') && $request->work_status === 'finished') {
                 $successMessage = 'Appointment marked as finished!';
@@ -226,10 +228,9 @@ class TechnicianController extends Controller
             } elseif ($request->has('work_status')) {
                 $successMessage = 'Work status updated successfully!';
             }
-            
+
             return redirect()->route('technician.dashboard')
                 ->with('success', $successMessage);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             Log::error('Validation failed for technician appointment update', [
@@ -237,12 +238,11 @@ class TechnicianController extends Controller
                 'errors' => $e->errors(),
                 'user_id' => Auth::id()
             ]);
-            
+
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'Validation failed: ' . implode(', ', $e->validator->errors()->all()));
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update technician appointment: ' . $e->getMessage(), [
@@ -250,7 +250,7 @@ class TechnicianController extends Controller
                 'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to update appointment. Please try again. Error: ' . $e->getMessage());

@@ -22,7 +22,7 @@ class PatientController extends Controller
             'contact_number' => 'nullable|string|max:20',
             'address'        => 'nullable|string|max:255',
             'email'          => 'nullable|email|max:255',
-           'dentist_id' => 'nullable|exists:tbl_dentist,dentist_id',
+            'dentist_id' => 'nullable|exists:dentists,id',
 
         ]);
 
@@ -38,7 +38,7 @@ class PatientController extends Controller
             'contact_number' => 'nullable|string|max:20',
             'address'        => 'nullable|string|max:255',
             'email'          => 'nullable|email|max:255',
-            'dentist_id' => 'nullable|exists:tbl_dentist,dentist_id',
+            'dentist_id' => 'nullable|exists:dentists,id',
 
         ]);
 

@@ -10,8 +10,8 @@ class Rider extends Authenticatable
     use Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'id'; 
-    public $timestamps = false;
+    protected $primaryKey = 'id';
+    public $timestamps = true; // Changed to true
 
     protected $fillable = [
         'name',
@@ -22,12 +22,20 @@ class Rider extends Authenticatable
         'photo',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
     public function deliveries()
     {
-        return $this->hasMany(\App\Models\Delivery::class, 'rider_id', 'id');
+        return $this->hasMany(Delivery::class, 'rider_id', 'id');
     }
 
-    // Scope to only riders
     public function scopeRiders($query)
     {
         return $query->where('role', 'rider');

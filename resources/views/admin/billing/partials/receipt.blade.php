@@ -13,35 +13,35 @@
 <div class="flex justify-between mb-2">
     <div class="text-lg font-semibold">Delivery Receipt</div>
     <div class="flex space-x-6">
-        <div>Billing No: <span class="font-bold text-red-600">{{ $billing->billing_id }}</span></div>
+        <div>Billing No: <span class="font-bold text-red-600">{{ $billing->id }}</span></div>
         <div>Date: <span class="border-b border-black inline-block min-w-[120px]">
-            {{ $billing->created_at->format('F j, Y g:ia') }}
-        </span></div>
+                {{ $billing->created_at->format('F j, Y g:ia') }}
+            </span></div>
     </div>
 </div>
 
 @php
-    $appointment = $billing->appointment;
-    $caseOrder = $appointment->caseOrder ?? null;
-    $material = $appointment->material ?? null;
-    
-    $dentist = $caseOrder && $caseOrder->dentist ? $caseOrder->dentist->name : 'N/A';
-    $clinic = $caseOrder && $caseOrder->clinic ? $caseOrder->clinic->clinic_name : 'N/A';
-    $clinicAddress = $caseOrder && $caseOrder->clinic ? $caseOrder->clinic->address : 'N/A';
-    $technician = $appointment->technician ? $appointment->technician->name : 'N/A';
+$appointment = $billing->appointment;
+$caseOrder = $appointment->caseOrder ?? null;
+$material = $appointment->material ?? null;
+
+$dentist = $caseOrder && $caseOrder->dentist ? $caseOrder->dentist->name : 'N/A';
+$clinic = $caseOrder && $caseOrder->clinic ? $caseOrder->clinic->clinic_name : 'N/A';
+$clinicAddress = $caseOrder && $caseOrder->clinic ? $caseOrder->clinic->address : 'N/A';
+$technician = $appointment->technician ? $appointment->technician->name : 'N/A';
 @endphp
 
 
 
 <div class="mb-2">
-    <div>Delivered to: 
+    <div>Delivered to:
         <span class="border-b border-black inline-block min-w-[200px]">
-            {{ $dentist }} 
-            @if($dentist && $clinic) / @endif 
+            {{ $dentist }}
+            @if($dentist && $clinic) / @endif
             {{ $clinic }}
         </span>
     </div>
-    <div>Address: 
+    <div>Address:
         <span class="inline-block border-b border-black min-w-[300px]">
             {{ $clinicAddress }}
         </span>
@@ -66,9 +66,9 @@
             <td>{{ $material->material_name }}</td>
             <td class="text-right">
                 @if($material->price)
-                    {{ number_format($material->price, 2) }}
+                {{ number_format($material->price, 2) }}
                 @else
-                    {{ number_format($billing->total_amount, 2) }}
+                {{ number_format($billing->total_amount, 2) }}
                 @endif
             </td>
             <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
@@ -82,7 +82,7 @@
             <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
         </tr>
         @endif
-        
+
         <tr>
             <td colspan="4" class="text-right font-semibold py-1">Subtotal</td>
             <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
@@ -115,9 +115,9 @@
             <div class="h-6"></div>
             <div class="text-center text-xs font-semibold">
                 @if($appointment->delivery && $appointment->delivery->rider)
-                    {{ $appointment->delivery->rider->name }}
+                {{ $appointment->delivery->rider->name }}
                 @else
-                    Not Assigned
+                Not Assigned
                 @endif
             </div>
             <div class="border-t border-black w-40 text-center text-xs mt-1">Rider / Delivery</div>

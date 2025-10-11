@@ -21,7 +21,7 @@ class BillingController extends Controller
                 'appointment.technician',
                 'appointment.delivery.rider'
             ])->get();
-            
+
             return view('admin.billing.index', compact('billings'));
         } catch (\Exception $e) {
             Log::error('Error loading billings: ' . $e->getMessage(), [
@@ -38,14 +38,14 @@ class BillingController extends Controller
             ->where('work_status', 'finished')
             ->whereDoesntHave('billing')
             ->get();
-            
+
         return view('billing.create', compact('appointments'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'appointment_id' => 'required|exists:tbl_appointment,appointment_id',
+            'appointment_id' => 'required|exists:appointments,appointment_id',
             'total_amount' => 'nullable|numeric|min:0', // total_amount can be null, calculated from material
         ]);
 
@@ -57,7 +57,7 @@ class BillingController extends Controller
 
             // Get the appointment to calculate total amount if not provided
             $appointment = Appointment::with('material')->findOrFail($request->appointment_id);
-            
+
             // Ensure appointment is finished
             if ($appointment->work_status !== 'finished') {
                 return redirect()->back()->withInput()->with('error', 'Billing can only be created for finished appointments.');
@@ -87,21 +87,22 @@ class BillingController extends Controller
         $appointments = Appointment::with('material', 'caseOrder.clinic')
             ->where('work_status', 'finished')
             ->get();
-            
+
         return view('billing.edit', compact('billing', 'appointments'));
     }
 
     public function update(Request $request, Billing $billing)
     {
         $request->validate([
-            'appointment_id' => 'required|exists:tbl_appointment,appointment_id',
+            'appointment_id' => 'required|exists:appointments,appointment_id',
             'total_amount' => 'required|numeric|min:0',
         ]);
 
         try {
-            // Prevent changing appointment if it would create duplicate billing
-            if ($request->appointment_id !== $billing->appointment_id && 
-                Billing::where('appointment_id', $request->appointment_id)->exists()) {
+            if (
+                $request->appointment_id !== $billing->appointment_id &&
+                Billing::where('appointment_id', $request->appointment_id)->exists()
+            ) {
                 return redirect()->back()->withInput()->with('error', 'Billing already exists for the selected appointment.');
             }
 
@@ -113,7 +114,7 @@ class BillingController extends Controller
             return redirect()->route('billing.index')->with('success', 'Billing updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating billing: ' . $e->getMessage(), [
-                'billing_id' => $billing->billing_id,
+                'id' => $billing->id,
                 'request_data' => $request->all(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -128,7 +129,7 @@ class BillingController extends Controller
             return redirect()->route('billing.index')->with('success', 'Billing deleted successfully.');
         } catch (\Exception $e) {
             Log::error('Error deleting billing: ' . $e->getMessage(), [
-                'billing_id' => $billing->billing_id,
+                'id' => $billing->id,
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('error', 'Failed to delete billing: ' . $e->getMessage());
@@ -143,7 +144,7 @@ class BillingController extends Controller
             'appointment.caseOrder.dentist',
             'appointment.delivery.rider'
         ]);
-        
+
         return view('billing.print', compact('billing'));
     }
 
@@ -166,9 +167,9 @@ class BillingController extends Controller
     {
         $billing = Billing::with(['appointment.material', 'appointment.caseOrder.clinic', 'appointment.technician', 'appointment.delivery.rider'])->find($billingId);
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.billing.receipt_pdf', compact('billing'));
-        return $pdf->download('receipt_'.$billingId.'.pdf');
+        return $pdf->download('receipt_' . $billingId . '.pdf');
     }
-   public function generateReport()
+    public function generateReport()
     {
         $billings = Billing::with(['appointment', 'caseOrder'])->orderBy('created_at', 'desc')->get();
 

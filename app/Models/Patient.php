@@ -2,31 +2,37 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Patient extends Model
 {
-    protected $table = 'patient';
+    use HasFactory;
+
     protected $primaryKey = 'patient_id';
-    public $timestamps = true;
-    
+
     protected $fillable = [
+        'clinic_id',
         'dentist_id',
-        'patient_name',
-        'address',
+        'name',
+        'email',
         'contact_number',
-        'email'
+        'address',
     ];
-    
-    // Relationship: One patient can have many case orders
-    public function caseOrders()
+
+    // RELATIONSHIPS
+    public function clinic()
     {
-        return $this->hasMany(CaseOrder::class, 'patient_id', 'patient_id');
+        return $this->belongsTo(Clinic::class, 'clinic_id', 'clinic_id');
     }
-    
-    // Relationship: Patient belongs to a dentist
+
     public function dentist()
     {
         return $this->belongsTo(Dentist::class, 'dentist_id', 'dentist_id');
+    }
+
+    public function caseOrders()
+    {
+        return $this->hasMany(CaseOrder::class, 'patient_id', 'patient_id');
     }
 }

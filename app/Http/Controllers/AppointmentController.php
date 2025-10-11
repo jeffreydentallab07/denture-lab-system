@@ -14,7 +14,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $appointments = Appointment::with(['technician', 'material', 'delivery', 'billing', 'caseOrder'])->get();
-        
+
         $technicians = User::where('role', 'technician')->get()->map(function ($tech) {
             $tech->is_busy = Appointment::where('technician_id', $tech->id)
                 ->whereIn('work_status', ['pending', 'in progress'])
@@ -62,7 +62,8 @@ class AppointmentController extends Controller
         if (Appointment::where('technician_id', $request->technician_id)
             ->whereIn('work_status', ['in progress', 'pending'])
             ->where('appointment_id', '!=', $appointment->appointment_id)
-            ->exists()) {
+            ->exists()
+        ) {
             return redirect()->back()->with('error', 'Technician is currently busy with another appointment.');
         }
 
@@ -70,7 +71,7 @@ class AppointmentController extends Controller
         $appointment->work_status = 'in progress'; // Automatically set to in progress when assigned
         $appointment->save();
 
-        return redirect()->route('appointments.index')->with('success', 'Technician assigned successfully!');
+        return redirect()->route('admin.appointments.index')->with('success', 'Technician assigned successfully!');
     }
 
     public function markAsFinished($id)
@@ -118,7 +119,7 @@ class AppointmentController extends Controller
         if (!$appointment->material) {
             return redirect()->back()->with('error', 'Cannot create billing: Material not selected for this appointment.');
         }
-        
+
         $totalAmount = $appointment->material->price ?? 0;
 
         Billing::create([

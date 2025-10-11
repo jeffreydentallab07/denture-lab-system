@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Delivery;
@@ -22,12 +23,12 @@ class DeliveryController extends Controller
     {
         $delivery = Delivery::findOrFail($delivery_id);
 
-        if (!is_null($delivery->rider_id) && $delivery->delivery_status !== Delivery::STATUS_READY_TO_DELIVER) {
+        if (!is_null($delivery->rider_id) && $delivery->delivery_status !== 'ready to deliver') {
             return redirect()->back()->with('error', 'This delivery is already assigned to a rider.');
         }
 
         $delivery->rider_id = $request->rider_id;
-        $delivery->delivery_status = Delivery::STATUS_IN_TRANSIT;
+        $delivery->delivery_status = 'in transit';
         $delivery->save();
 
         return redirect()->back()->with('success', 'Rider assigned successfully.');
@@ -45,7 +46,7 @@ class DeliveryController extends Controller
             $delivery = Delivery::create([
                 'appointment_id' => $appointment->appointment_id,
                 'rider_id' => null,
-                'delivery_status' => Delivery::STATUS_READY_TO_DELIVER,
+                'delivery_status' => 'ready to deliver',
                 'delivery_date' => now(), // Only include if column exists
             ]);
         } catch (\Illuminate\Database\QueryException $e) {
@@ -54,7 +55,7 @@ class DeliveryController extends Controller
                 $delivery = Delivery::create([
                     'appointment_id' => $appointment->appointment_id,
                     'rider_id' => null,
-                    'delivery_status' => Delivery::STATUS_READY_TO_DELIVER,
+                    'delivery_status' => 'ready to deliver',
                 ]);
             } else {
                 throw $e;
@@ -76,12 +77,12 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'You are not authorized to update this delivery.');
         }
 
-        if (in_array($delivery->delivery_status, [Delivery::STATUS_IN_TRANSIT, Delivery::STATUS_READY_TO_DELIVER])) {
-            $delivery->delivery_status = Delivery::STATUS_DELIVERED;
+        if (in_array($delivery->delivery_status, ['in transit', 'ready to deliver'])) {
+            $delivery->delivery_status = 'delivered';
             $delivery->save();
 
             return redirect()->route('rider.dashboard')
-                            ->with('success', 'Delivery marked as delivered.');
+                ->with('success', 'Delivery marked as delivered.');
         }
 
         return redirect()->back()->with('error', 'Delivery cannot be marked as delivered from its current state (' . $delivery->delivery_status . ').');
@@ -99,22 +100,22 @@ class DeliveryController extends Controller
         ]);
 
         // Prevent changing status if already delivered or cancelled
-        if (in_array($delivery->delivery_status, [Delivery::STATUS_DELIVERED, Delivery::STATUS_CANCELLED])) {
+        if (in_array($delivery->delivery_status, ['delivered', 'cancelled'])) {
             return redirect()->back()->with('error', 'Cannot change status of a ' . $delivery->delivery_status . ' delivery.');
         }
-        
+
         // Handle specific status transitions
-        if ($request->delivery_status === Delivery::STATUS_IN_TRANSIT && $delivery->delivery_status === Delivery::STATUS_READY_TO_DELIVER) {
-            $delivery->delivery_status = Delivery::STATUS_IN_TRANSIT;
+        if ($request->delivery_status === 'in transit' && $delivery->delivery_status === 'ready to deliver') {
+            $delivery->delivery_status = 'in transit';
             $delivery->save();
             return redirect()->route('rider.dashboard')->with('success', 'Delivery status updated to In Transit.');
-        } elseif ($request->delivery_status === Delivery::STATUS_DELIVERED && $delivery->delivery_status === Delivery::STATUS_IN_TRANSIT) {
+        } elseif ($request->delivery_status === 'delivered' && $delivery->delivery_status === 'in transit') {
             return $this->markDelivered($delivery);
-        } elseif ($request->delivery_status === Delivery::STATUS_DELIVERED && $delivery->delivery_status === Delivery::STATUS_READY_TO_DELIVER) {
+        } elseif ($request->delivery_status === 'delivered' && $delivery->delivery_status === 'ready to deliver') {
             Log::warning('Delivery marked delivered from Ready to Deliver state', ['delivery_id' => $delivery->delivery_id]);
             return $this->markDelivered($delivery);
         }
-        
+
         $delivery->delivery_status = $request->delivery_status;
         $delivery->save();
 

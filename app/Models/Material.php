@@ -9,41 +9,42 @@ class Material extends Model
 {
     use HasFactory;
 
-    protected $table = 'tbl_materials'; // Adjust table name as needed
     protected $primaryKey = 'material_id';
-    
+
     protected $fillable = [
         'material_name',
-        'price',
         'description',
+        'quantity',
+        'unit',
+        'price',
+        'supplier',
         'status',
     ];
 
     protected $casts = [
+        'quantity' => 'integer',
         'price' => 'decimal:2',
     ];
 
-    // One-to-Many relationship with Appointments (if multiple appointments can use same material)
-    public function appointments()
+    // Get total value
+    public function getTotalValueAttribute()
     {
-        return $this->hasMany(Appointment::class, 'material_id', 'material_id');
+        return $this->quantity * $this->price;
     }
 
-    // One-to-One inverse relationship (optional, for convenience)
-    public function appointment()
+    // Get status badge color
+    public function getStatusColorAttribute()
     {
-        return $this->hasOne(Appointment::class, 'material_id', 'material_id');
+        return match ($this->status) {
+            'available' => 'green',
+            'low stock' => 'yellow',
+            'out of stock' => 'red',
+            default => 'gray',
+        };
     }
 
-    // Accessor for formatted price
-    public function getFormattedPriceAttribute()
+    public function usages()
     {
-        return '₱' . number_format($this->price, 2);
-    }
-
-    // Scope for active materials
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
+        return $this->hasMany(MaterialUsage::class, 'material_id', 'material_id');
     }
 }

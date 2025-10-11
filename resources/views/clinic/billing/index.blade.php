@@ -1,132 +1,188 @@
 @extends('layouts.clinic')
-@section('page-title', 'Billing List')
+
+@section('title', 'Billing')
+
 @section('content')
-<div class="p-6 space-y-6 bg-gray-300 min-h-screen">
+<div class="p-6 bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto">
 
-<div class="overflow-x-auto rounded-xl shadow-lg mt-4">
-    <table class="min-w-full bg-white border border-gray-200">
-        <thead>
-            <tr class="bg-blue-900 text-white">
-                <th class="px-6 py-3 text-left">Appointment ID</th>
-                <th class="px-6 py-3 text-left">Patient Name</th>
-                <th class="px-6 py-3 text-left">Case Type</th>
-                <th class="px-6 py-3 text-left">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($billings as $billing)
-            <tr class="hover:bg-blue-50 transition">
-                <td class="px-6 py-3 text-gray-700">{{ $billing->appointment_id }}</td>
-                <td class="px-6 py-3 text-gray-700">{{ $billing->patient_name ?? '-' }}</td>
-                <td class="px-6 py-3 text-gray-700">{{ $billing->case_type ?? '-' }}</td>
-                <td class="px-6 py-3 text-gray-700" x-data="{ open: false }">
-                 
-                    <button @click="open = true"
-                        class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-                        View
-                    </button>
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Billing</h1>
+            <p class="text-gray-600">View all your billing records and payment status</p>
+        </div>
 
-                   
-                    <div x-show="open" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div @click.away="open = false" class="bg-white p-6 rounded-lg w-[700px] max-h-[90vh] overflow-y-auto">
+        @if(session('success'))
+        <div class="mb-4 p-3 rounded bg-green-100 text-green-700 border border-green-300">
+            {{ session('success') }}
+        </div>
+        @endif
 
-                        
-                            <div class="text-left mb-2">
-                                <h1 class="text-xl font-bold uppercase">Jeffrey Dental Laboratory</h1>
-                                <p class="leading-tight text-[11px]">
-                                    Zone 7 Bulua District 1<br />
-                                    9000 Cagayan de Oro City (CAPITAL)<br />
-                                    Misamis Oriental Philippines<br />
-                                    <strong>JEFFREY D. GELLANGAO - PROP.</strong><br />
-                                    Non Vat Reg., TIN 408-400-984-00000
-                                </p>
-                            </div>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Total Bills</h3>
+                <p class="text-3xl font-bold text-blue-600 mt-2">{{ $billings->total() }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Unpaid</h3>
+                <p class="text-3xl font-bold text-red-600 mt-2">
+                    {{ $billings->where('payment_status', 'unpaid')->count() }}
+                </p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Partial</h3>
+                <p class="text-3xl font-bold text-yellow-600 mt-2">
+                    {{ $billings->where('payment_status', 'partial')->count() }}
+                </p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Paid</h3>
+                <p class="text-3xl font-bold text-green-600 mt-2">
+                    {{ $billings->where('payment_status', 'paid')->count() }}
+                </p>
+            </div>
+        </div>
 
-                            <div class="flex justify-between mb-2">
-                                <div class="text-lg font-semibold">Delivery Receipt</div>
-                                <div class="flex space-x-6">
-                                    <div>No: <span class="font-bold text-red-600">{{ $billing->appointment_id }}</span></div>
-                                    <div>Date: <span class="border-b border-black inline-block min-w-[120px]">{{ \Carbon\Carbon::parse($billing->created_at)->format('F j, Y g:ia') }}</span></div>
-                                </div>
-                            </div>
+        <!-- Filter Tabs -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="flex border-b">
+                <button onclick="filterBillings('all')"
+                    class="filter-tab px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600">
+                    All
+                </button>
+                <button onclick="filterBillings('unpaid')"
+                    class="filter-tab px-6 py-3 font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent">
+                    Unpaid
+                </button>
+                <button onclick="filterBillings('partial')"
+                    class="filter-tab px-6 py-3 font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent">
+                    Partial
+                </button>
+                <button onclick="filterBillings('paid')"
+                    class="filter-tab px-6 py-3 font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent">
+                    Paid
+                </button>
+            </div>
+        </div>
 
-
-                            <table class="w-full text-left border-t border-b border-black mb-2">
-                                <thead>
-                                    <tr class="border-b border-black">
-                                        <th class="w-10 py-1">Qty</th>
-                                        <th class="w-12">Unit</th>
-                                        <th>Description Articles</th>
-                                        <th class="w-20 text-right">U-Price</th>
-                                        <th class="w-20 text-right">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="border-b border-gray-300">
-                                        <td class="py-1">1</td>
-                                        <td>pc</td>
-                                        <td>{{ $billing->material_name ?? 'Not set' }}</td>
-                                        <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
-                                        <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4" class="text-right font-semibold py-1">Subtotal</td>
-                                        <td class="text-right">{{ number_format($billing->total_amount, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4" class="text-right font-semibold py-1">VAT (12%)</td>
-                                        <td class="text-right">{{ number_format($billing->total_amount * 0.12, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4" class="text-right font-bold py-2">Total ₱</td>
-                                        <td class="text-right font-bold">{{ number_format($billing->total_amount, 2) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="flex justify-between mt-6">
-                                <div>
-                                    Created by:
-                                    <div class="h-6"></div>
-                                    <div class="text-center text-xs font-semibold">JEFFREY GELLANGAO</div>
-                                    <div class="border-t border-black w-40 text-center text-xs mt-1">Authorized Signature</div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="leading-tight text-sm">
-                                        Received the above Merchandise<br />
-                                        in good order and Condition
-                                    </p>
-                                    <div>
-                                        Delivered by:
-                                        <div class="h-6"></div>
-                                        <div class="text-center text-xs font-semibold">{{ $billing->rider_name ?? 'Not Assigned' }}</div>
-                                        <div class="border-t border-black w-40 text-center text-xs mt-1">Delivered By</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end mt-4">
-                                <button @click="open = false"
-                                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-                                    Close
-                                </button>
-                            </div>
-
+        <!-- Billing Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($billings as $billing)
+            <div class="billing-card bg-white rounded-lg shadow hover:shadow-lg transition"
+                data-status="{{ $billing->payment_status }}">
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs text-gray-500">Billing ID</p>
+                            <p class="text-lg font-bold text-gray-800">BILL-{{ str_pad($billing->id, 5, '0',
+                                STR_PAD_LEFT) }}</p>
                         </div>
+                        <span
+                            class="px-3 py-1 text-xs rounded-full font-medium
+                            {{ $billing->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
+                               ($billing->payment_status === 'partial' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                            {{ ucfirst($billing->payment_status) }}
+                        </span>
                     </div>
 
-                </td>
-            </tr>
+                    <!-- Amount -->
+                    <div class="mb-4 pb-4 border-b">
+                        <p class="text-xs text-gray-500">Total Amount</p>
+                        <p class="text-2xl font-bold text-green-600">₱{{ number_format($billing->total_amount, 2) }}</p>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <p class="text-sm text-gray-700">{{ $billing->appointment->caseOrder->patient->name ?? 'N/A'
+                                }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            <p class="text-sm text-gray-700">CASE-{{ str_pad($billing->appointment->case_order_id, 5,
+                                '0', STR_PAD_LEFT) }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <p class="text-sm text-gray-700">{{ $billing->created_at->format('M d, Y') }}</p>
+                        </div>
+                        @if($billing->payment_method)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                </path>
+                            </svg>
+                            <p class="text-sm text-gray-700">{{ $billing->payment_method }}</p>
+                        </div>
+                        @endif
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="border-t pt-4">
+                        <a href="{{ route('clinic.billing.show', $billing->id) }}"
+                            class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
             @empty
-            <tr>
-                <td colspan="4" class="text-center py-8 text-gray-500">No completed billings found.</td>
-            </tr>
+            <div class="col-span-3 text-center py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                <p class="text-gray-500">No billing records found</p>
+            </div>
             @endforelse
-        </tbody>
-    </table>
+        </div>
+
+        <!-- Pagination -->
+        @if($billings->hasPages())
+        <div class="mt-6">
+            {{ $billings->links() }}
+        </div>
+        @endif
+    </div>
 </div>
 
-<!-- Alpine.js -->
-<script src="//unpkg.com/alpinejs" defer></script>
-
+<script>
+    function filterBillings(status) {
+    const cards = document.querySelectorAll('.billing-card');
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    // Update tab styles
+    tabs.forEach(tab => {
+        tab.classList.remove('border-blue-600', 'text-blue-600');
+        tab.classList.add('border-transparent', 'text-gray-600');
+    });
+    event.target.classList.add('border-blue-600', 'text-blue-600');
+    event.target.classList.remove('border-transparent');
+    
+    // Filter cards
+    cards.forEach(card => {
+        if (status === 'all' || card.dataset.status === status) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
 @endsection

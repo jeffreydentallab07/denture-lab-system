@@ -23,7 +23,7 @@ class ClinicSettingsController extends Controller
 
         $validated = $request->validate([
             'clinic_name'    => 'required|string|max:255',
-            'email'          => 'required|email|unique:tbl_clinic,email,' . $clinic->clinic_id . ',clinic_id',
+            'email'          => 'required|email|unique:clinics,email,' . $clinic->clinic_id . ',clinic_id',
             'contact_number' => 'nullable|string|max:20',
             'password'       => 'nullable|string|min:8|confirmed',
             'photo'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',

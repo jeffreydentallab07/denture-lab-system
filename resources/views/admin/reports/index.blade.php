@@ -1,46 +1,89 @@
 @extends('layouts.app')
 
-@section('title', 'Reports')
+@section('page-title', 'Reports & Analytics')
 
 @section('content')
-<div class="p-6 bg-gray-100 min-h-screen">
-    <h1 class="text-2xl font-bold mb-6">Reports Dashboard</h1>
+<div class="p-6 space-y-6 bg-gray-300 min-h-screen">
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <a href="{{ route('reports.caseorders') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Case Orders Report</h2>
-            <p class="text-sm text-gray-500">View all case orders</p>
-        </a>
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Reports & Analytics</h1>
+            <p class="text-gray-600">Generate and export comprehensive business reports</p>
+        </div>
+        <button onclick="exportPDF()"
+            class="bg-red-600 text-white px-5 py-2 rounded font-semibold hover:bg-red-700 transition flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            Export PDF
+        </button>
+    </div>
 
-        <a href="{{ route('reports.appointments') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Appointments Report</h2>
-            <p class="text-sm text-gray-500">View all appointments</p>
-        </a>
+    <!-- Filter Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="GET" action="{{ route('admin.reports.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                <select name="type"
+                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
+                    <option value="overview" {{ $reportType==='overview' ? 'selected' : '' }}>Overview</option>
+                    <option value="case-orders" {{ $reportType==='case-orders' ? 'selected' : '' }}>Case Orders</option>
+                    <option value="revenue" {{ $reportType==='revenue' ? 'selected' : '' }}>Revenue</option>
+                    <option value="materials" {{ $reportType==='materials' ? 'selected' : '' }}>Materials</option>
+                    <option value="clinic-performance" {{ $reportType==='clinic-performance' ? 'selected' : '' }}>Clinic
+                        Performance</option>
+                    <option value="technician-performance" {{ $reportType==='technician-performance' ? 'selected' : ''
+                        }}>Technician Performance</option>
+                    <option value="delivery-performance" {{ $reportType==='delivery-performance' ? 'selected' : '' }}>
+                        Delivery Performance</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+                <input type="date" name="date_from" value="{{ $dateFrom }}"
+                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
+                <input type="date" name="date_to" value="{{ $dateTo }}"
+                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+                    Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
 
-        <a href="{{ route('reports.deliveries') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Deliveries Report</h2>
-            <p class="text-sm text-gray-500">Track deliveries</p>
-        </a>
-
-        <a href="{{ route('reports.billings') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Billing Report</h2>
-            <p class="text-sm text-gray-500">View billing details</p>
-        </a>
-
-        <a href="{{ route('reports.technicians') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Technicians Report</h2>
-            <p class="text-sm text-gray-500">View technicians performance</p>
-        </a>
-
-        <a href="{{ route('reports.riders') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Riders Report</h2>
-            <p class="text-sm text-gray-500">View riders deliveries</p>
-        </a>
-
-        <a href="{{ route('reports.clinics') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-xl">
-            <h2 class="font-semibold text-lg">Clinics Report</h2>
-            <p class="text-sm text-gray-500">View clinics activity</p>
-        </a>
+    <!-- Report Content -->
+    <div id="reportContent">
+        @if($reportType === 'overview')
+        @include('admin.reports.partials.overview', ['data' => $data])
+        @elseif($reportType === 'case-orders')
+        @include('admin.reports.partials.case-orders', ['data' => $data])
+        @elseif($reportType === 'revenue')
+        @include('admin.reports.partials.revenue', ['data' => $data])
+        @elseif($reportType === 'materials')
+        @include('admin.reports.partials.materials', ['data' => $data])
+        @elseif($reportType === 'clinic-performance')
+        @include('admin.reports.partials.clinic-performance', ['data' => $data])
+        @elseif($reportType === 'technician-performance')
+        @include('admin.reports.partials.technician-performance', ['data' => $data])
+        @elseif($reportType === 'delivery-performance')
+        @include('admin.reports.partials.delivery-performance', ['data' => $data])
+        @endif
     </div>
 </div>
+
+<script>
+    function exportPDF() {
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = '{{ route("admin.reports.exportPdf") }}?' + params.toString();
+}
+</script>
 @endsection

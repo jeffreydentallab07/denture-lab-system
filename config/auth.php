@@ -2,14 +2,14 @@
 
 return [
 
-    
+
 
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'web'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
-    
+
 
 
     'guards' => [
@@ -39,7 +39,6 @@ return [
         ],
     ],
 
-    
 
     'providers' => [
         'users' => [
@@ -53,7 +52,6 @@ return [
         ],
     ],
 
-    
 
     'passwords' => [
         'users' => [
@@ -71,7 +69,7 @@ return [
         ],
     ],
 
-   
+
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
