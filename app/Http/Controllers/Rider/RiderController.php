@@ -86,7 +86,7 @@ class RiderController extends Controller
                 'case_picked_up',
                 'Case Picked Up',
                 "Your case order CASE-" . str_pad($pickup->case_order_id, 5, '0', STR_PAD_LEFT) . " has been successfully picked up by our rider and is on its way to our lab.",
-                route('clinic.case-orders.show', $pickup->case_order_id),
+                route('rider.pickups.show', $pickup->id),
                 $pickup->case_order_id
             );
         }
