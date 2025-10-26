@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class ReportController extends Controller
+class ReportExportController extends Controller
 {
     /**
      * Show the reports page (form + export buttons)

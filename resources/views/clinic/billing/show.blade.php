@@ -227,7 +227,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="bg-white rounded-lg shadow p-6">
+                {{-- <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Actions</h3>
 
                     <div class="space-y-3">
@@ -236,7 +236,7 @@
                             Print Invoice
                         </button>
                     </div>
-                </div>
+                </div> --}}
 
             </div>
         </div>

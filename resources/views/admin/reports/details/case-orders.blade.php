@@ -226,7 +226,10 @@
         date_from: '{{ $dateFrom }}',
         date_to: '{{ $dateTo }}'
     });
-    window.location.href = '{{ route("admin.reports.caseOrdersDetailPdf") }}?' + params.toString();
+    
+    // Open print preview page in new tab
+    const printUrl = '{{ route("admin.reports.printCaseOrdersDetail") }}?' + params.toString();
+    window.open(printUrl, '_blank');
 }
 </script>
 @endsection

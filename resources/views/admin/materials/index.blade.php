@@ -268,7 +268,7 @@
         const form = document.getElementById('editMaterialForm');
         const modalContent = document.getElementById('editMaterialModalContent');
         
-        form.action = `/admin/materials/${id}`;
+        form.action = "{{ url('admin/materials') }}/" + id;
         
         modalContent.innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

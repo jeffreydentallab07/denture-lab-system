@@ -138,16 +138,17 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{ $usage->material_name }}</td>
-                        <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ $usage->total_used }}</td>
+                        <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ number_format($usage->total_used, 2)
+                            }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">{{ $usage->unit }}</td>
-                        <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{ number_format($usage->total_cost, 2)
+                        <td class="px-4 py-3 text-sm font-bold text-purple-600">₱{{ number_format($usage->total_cost, 2)
                             }}</td>
                         <td class="px-4 py-3 text-sm font-semibold text-gray-700">
                             {{ $data['total_material_cost'] > 0 ? number_format(($usage->total_cost /
                             $data['total_material_cost']) * 100, 1) : 0 }}%
                         </td>
                         <td class="px-4 py-3">
-                            <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="w-24 bg-gray-200 rounded-full h-3">
                                 <div class="bg-purple-500 h-3 rounded-full"
                                     style="width: {{ $data['total_material_cost'] > 0 ? ($usage->total_cost / $data['total_material_cost']) * 100 : 0 }}%">
                                 </div>
@@ -160,19 +161,19 @@
         </div>
     </div>
 
-    <!-- All Material Usage -->
+    <!-- All Materials Usage -->
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Complete Material Usage Report</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">All Materials Usage in Period</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material Name</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Used</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Used</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit Price</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Cost</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">% of Total Cost</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -180,22 +181,24 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-sm text-gray-600">{{ $index + 1 }}</td>
                         <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ $usage->material_name }}</td>
-                        <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ $usage->total_used }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ $usage->unit }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">
-                            ₱{{ number_format($usage->total_used > 0 ? $usage->total_cost / $usage->total_used : 0, 2)
-                            }}
-                        </td>
-                        <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{ number_format($usage->total_cost, 2)
+                        <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ number_format($usage->total_used, 2)
                             }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ $usage->unit }}</td>
+                        <td class="px-4 py-3 text-sm font-bold text-purple-600">₱{{ number_format($usage->total_cost, 2)
+                            }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            {{ $data['total_material_cost'] > 0 ? number_format(($usage->total_cost /
+                            $data['total_material_cost']) * 100, 1) : 0 }}%
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
                 <tfoot class="bg-purple-50">
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-sm font-bold text-gray-800 text-right">Total Material
-                            Cost:</td>
-                        <td class="px-4 py-3 text-lg font-bold text-purple-600">₱{{
+                        <td colspan="4" class="px-4 py-3 text-sm font-bold text-gray-800 text-right">Total Material
+                            Cost:
+                        </td>
+                        <td colspan="2" class="px-4 py-3 text-lg font-bold text-purple-600">₱{{
                             number_format($data['total_material_cost'], 2) }}</td>
                     </tr>
                 </tfoot>
@@ -203,18 +206,10 @@
         </div>
     </div>
 
-    <!-- Low Stock Alert -->
+    <!-- Low Stock / Out of Stock Alert -->
     @if($data['low_stock_materials']->count() > 0)
-    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-red-500">
-        <h2 class="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-            </svg>
-            Critical Inventory Alerts
-        </h2>
-        <p class="text-sm text-gray-600 mb-4">The following materials require immediate attention and restocking:</p>
+    <div class="bg-white rounded-lg shadow-lg p-6 border-2 border-red-300">
+        <h2 class="text-xl font-bold text-red-600 mb-4 border-b pb-2">⚠️ Materials Needing Immediate Attention</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-red-900 text-white">
@@ -347,7 +342,10 @@
         date_from: '{{ $dateFrom }}',
         date_to: '{{ $dateTo }}'
     });
-    window.location.href = '{{ route("admin.reports.materialsDetailPdf") }}?' + params.toString();
+    
+    // Open print preview page in new tab
+    const printUrl = '{{ route("admin.reports.printMaterialsDetail") }}?' + params.toString();
+    window.open(printUrl, '_blank');
 }
 </script>
 @endsection

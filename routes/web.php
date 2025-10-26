@@ -51,18 +51,20 @@ use App\Http\Controllers\Rider\DeliveriesController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn() => view('landing'))->name('home');
+Route::get('/home', fn() => view('landing'))->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| UNIVERSAL AUTHENTICATION
+| AUTHENTICATION ROUTES
 |--------------------------------------------------------------------------
-| One login for all user types (admin, technician, rider, clinic)
 */
 
-Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -74,7 +76,7 @@ Route::post('/clinic/signup', [ClinicAuthController::class, 'signup'])->name('cl
 
 /*
 |--------------------------------------------------------------------------
-| NOTIFICATION
+| UNIVERSAL AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 */
 
@@ -82,6 +84,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markRead');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.updateProfile');
@@ -92,10 +95,9 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 | ADMIN ROUTES (Laboratory Management)
 |--------------------------------------------------------------------------
-| For users with role='admin'
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -114,7 +116,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Materials Management
     Route::resource('materials', AdminMaterialsController::class);
-
 
     // Clinics Management
     Route::resource('clinics', AdminClinicsController::class);
@@ -141,14 +142,21 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [AdminReportsController::class, 'index'])->name('index');
         Route::get('/export-pdf', [AdminReportsController::class, 'exportPdf'])->name('exportPdf');
-        // Detail Pages
+        Route::get('/print', [AdminReportsController::class, 'print'])->name('print');
+
+        // Case Orders Detail
         Route::get('/case-orders/detail', [AdminReportsController::class, 'caseOrdersDetail'])->name('caseOrdersDetail');
+        Route::get('/case-orders-detail/print', [AdminReportsController::class, 'printCaseOrdersDetail'])->name('printCaseOrdersDetail');
         Route::get('/case-orders/detail/pdf', [AdminReportsController::class, 'caseOrdersDetailPdf'])->name('caseOrdersDetailPdf');
 
+        // Revenue Detail
         Route::get('/revenue/detail', [AdminReportsController::class, 'revenueDetail'])->name('revenueDetail');
+        Route::get('/revenue-detail/print', [AdminReportsController::class, 'printRevenueDetail'])->name('printRevenueDetail');
         Route::get('/revenue/detail/pdf', [AdminReportsController::class, 'revenueDetailPdf'])->name('revenueDetailPdf');
 
+        // Materials Detail
         Route::get('/materials/detail', [AdminReportsController::class, 'materialsDetail'])->name('materialsDetail');
+        Route::get('/materials-detail/print', [AdminReportsController::class, 'printMaterialsDetail'])->name('printMaterialsDetail');
         Route::get('/materials/detail/pdf', [AdminReportsController::class, 'materialsDetailPdf'])->name('materialsDetailPdf');
     });
 });
@@ -157,7 +165,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 |--------------------------------------------------------------------------
 | CLINIC ROUTES
 |--------------------------------------------------------------------------
-| For clinic users (separate guard)
 */
 
 Route::middleware(['auth:clinic'])->prefix('clinic')->name('clinic.')->group(function () {
@@ -195,34 +202,43 @@ Route::middleware(['auth:clinic'])->prefix('clinic')->name('clinic.')->group(fun
 |--------------------------------------------------------------------------
 | TECHNICIAN ROUTES
 |--------------------------------------------------------------------------
-| For users with role='technician'
 */
 
-Route::middleware(['auth'])->prefix('technician')->name('technician.')->group(function () {
+Route::middleware(['auth', 'check.technician'])->prefix('technician')->name('technician.')->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', [TechnicianController::class, 'dashboard'])->name('dashboard');
+
+    // Appointments
     Route::get('/appointments', [TechnicianController::class, 'appointmentsIndex'])->name('appointments.index');
     Route::get('/appointments/{id}', [TechnicianController::class, 'showAppointment'])->name('appointments.show');
     Route::post('/appointments/{id}/update', [TechnicianController::class, 'updateAppointment'])->name('appointment.update');
     Route::post('/appointments/{id}/add-material', [TechnicianController::class, 'addMaterial'])->name('appointments.addMaterial');
     Route::delete('/appointments/{appointmentId}/materials/{usageId}', [TechnicianController::class, 'removeMaterial'])->name('appointments.removeMaterial');
+
+    // Materials
     Route::get('/materials', [TechnicianController::class, 'materialsIndex'])->name('materials.index');
+
+    // Work History
     Route::get('/work-history', [TechnicianController::class, 'workHistory'])->name('work-history');
 
     // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::get('/notifications', [TechnicianNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-read', [TechnicianNotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/mark-all-read', [TechnicianNotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
 
 /*
 |--------------------------------------------------------------------------
 | RIDER ROUTES
 |--------------------------------------------------------------------------
-| For users with role='rider'
 */
 
-Route::middleware(['auth'])->prefix('rider')->name('rider.')->group(function () {
+Route::middleware(['auth', 'check.rider'])->prefix('rider')->name('rider.')->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', [RiderController::class, 'dashboard'])->name('dashboard');
+
     // Pickups
     Route::get('/pickups', [PickupsController::class, 'index'])->name('pickups.index');
     Route::get('/pickups/{id}', [PickupsController::class, 'show'])->name('pickups.show');
@@ -232,4 +248,37 @@ Route::middleware(['auth'])->prefix('rider')->name('rider.')->group(function () 
     Route::get('/deliveries', [DeliveriesController::class, 'index'])->name('deliveries.index');
     Route::get('/deliveries/{id}', [DeliveriesController::class, 'show'])->name('deliveries.show');
     Route::put('/deliveries/{id}/update-status', [DeliveriesController::class, 'updateStatus'])->name('deliveries.updateStatus');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ROOT REDIRECT
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function () {
+    if (auth()->check()) {
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->hasRole('technician')) {
+            return redirect()->route('technician.dashboard');
+        }
+
+        if ($user->hasRole('rider')) {
+            return redirect()->route('rider.dashboard');
+        }
+
+        return redirect()->route('home');
+    }
+
+    // Check clinic guard separately
+    if (auth('clinic')->check()) {
+        return redirect()->route('clinic.dashboard');
+    }
+
+    return redirect()->route('login');
 });

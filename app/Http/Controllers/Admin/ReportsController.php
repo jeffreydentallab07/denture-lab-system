@@ -327,6 +327,50 @@ class ReportsController extends Controller
     }
 
 
+    /**
+     * Show print preview of report (opens in new tab)
+     */
+    public function print(Request $request)
+    {
+        $reportType = $request->get('type', 'overview');
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
+        $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+
+        $data = [];
+
+        switch ($reportType) {
+            case 'case-orders':
+                $data = $this->getCaseOrdersReport($dateFrom, $dateTo);
+                break;
+            case 'revenue':
+                $data = $this->getRevenueReport($dateFrom, $dateTo);
+                break;
+            case 'materials':
+                $data = $this->getMaterialsReport($dateFrom, $dateTo);
+                break;
+            case 'clinic-performance':
+                $data = $this->getClinicPerformanceReport($dateFrom, $dateTo);
+                break;
+            case 'technician-performance':
+                $data = $this->getTechnicianPerformanceReport($dateFrom, $dateTo);
+                break;
+            case 'delivery-performance':
+                $data = $this->getDeliveryPerformanceReport($dateFrom, $dateTo);
+                break;
+            default:
+                $data = $this->getOverviewReport();
+                break;
+        }
+
+        return view('admin.reports.print', [
+            'reportType' => $reportType,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+            'data' => $data
+        ]);
+    }
+
+
     // Case Orders Detail
     public function caseOrdersDetail(Request $request)
     {
@@ -336,6 +380,16 @@ class ReportsController extends Controller
         $data = $this->getCaseOrdersReport($dateFrom, $dateTo);
 
         return view('admin.reports.details.case-orders', compact('dateFrom', 'dateTo', 'data'));
+    }
+
+    public function printCaseOrdersDetail(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
+        $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+
+        $data = $this->getCaseOrdersReport($dateFrom, $dateTo);
+
+        return view('admin.reports.details.print-case-orders', compact('dateFrom', 'dateTo', 'data'));
     }
 
     public function caseOrdersDetailPdf(Request $request)
@@ -366,6 +420,17 @@ class ReportsController extends Controller
         return view('admin.reports.details.revenue', compact('dateFrom', 'dateTo', 'data'));
     }
 
+
+    public function printRevenueDetail(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
+        $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+
+        $data = $this->getRevenueReport($dateFrom, $dateTo);
+
+        return view('admin.reports.details.print-revenue', compact('dateFrom', 'dateTo', 'data'));
+    }
+
     public function revenueDetailPdf(Request $request)
     {
         $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
@@ -392,6 +457,16 @@ class ReportsController extends Controller
         $data = $this->getMaterialsReport($dateFrom, $dateTo);
 
         return view('admin.reports.details.materials', compact('dateFrom', 'dateTo', 'data'));
+    }
+
+    public function printMaterialsDetail(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
+        $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+
+        $data = $this->getMaterialsReport($dateFrom, $dateTo);
+
+        return view('admin.reports.details.print-materials', compact('dateFrom', 'dateTo', 'data'));
     }
 
     public function materialsDetailPdf(Request $request)

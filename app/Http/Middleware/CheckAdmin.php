@@ -10,7 +10,11 @@ class CheckAdmin
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if (!Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized');
         }
 

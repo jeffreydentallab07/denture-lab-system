@@ -134,14 +134,15 @@
                             </div>
                         </div>
                     </div>
+                    <p class="text-sm text-gray-600 mt-2">Payment collection efficiency</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Top Revenue Clinics -->
+    <!-- Top Revenue Generators -->
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Top 10 Revenue-Generating Clinics</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Top 10 Revenue Generating Clinics</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-green-900 text-white">
@@ -154,30 +155,30 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach($data['revenue_by_clinic'] as $index => $revenue)
-                    <tr class="hover:bg-gray-50 {{ $index < 3 ? 'bg-yellow-50' : '' }}">
+                    @foreach($data['revenue_by_clinic'] as $clinicName => $clinicRevenue)
+                    <tr class="hover:bg-gray-50 {{ $loop->index < 3 ? 'bg-green-50' : '' }}">
                         <td class="px-4 py-3">
-                            @if($loop->iteration === 1)
+                            @if($loop->index === 0)
                             <span class="text-2xl">🥇</span>
-                            @elseif($loop->iteration === 2)
+                            @elseif($loop->index === 1)
                             <span class="text-2xl">🥈</span>
-                            @elseif($loop->iteration === 3)
+                            @elseif($loop->index === 2)
                             <span class="text-2xl">🥉</span>
                             @else
                             <span class="font-semibold text-gray-600">{{ $loop->iteration }}</span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{ $loop->iteration }}. {{ $index }}
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{ $clinicName }}</td>
+                        <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{ number_format($clinicRevenue, 2) }}
                         </td>
-                        <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{ number_format($revenue, 2) }}</td>
                         <td class="px-4 py-3 text-sm font-semibold text-gray-700">
-                            {{ $data['total_revenue'] > 0 ? number_format(($revenue / $data['total_revenue']) * 100, 1)
-                            : 0 }}%
+                            {{ $data['total_revenue'] > 0 ? number_format(($clinicRevenue / $data['total_revenue']) *
+                            100, 1) : 0 }}%
                         </td>
                         <td class="px-4 py-3">
-                            <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="w-32 bg-gray-200 rounded-full h-3">
                                 <div class="bg-green-500 h-3 rounded-full"
-                                    style="width: {{ $data['total_revenue'] > 0 ? ($revenue / $data['total_revenue']) * 100 : 0 }}%">
+                                    style="width: {{ $data['total_revenue'] > 0 ? ($clinicRevenue / $data['total_revenue']) * 100 : 0 }}%">
                                 </div>
                             </div>
                         </td>
@@ -188,7 +189,7 @@
         </div>
     </div>
 
-    <!-- Revenue by Month -->
+    <!-- Monthly Revenue Trend -->
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Monthly Revenue Trend</h2>
         <div class="overflow-x-auto">
@@ -289,7 +290,7 @@
 
     <!-- Financial Insights -->
     <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Financial Insights</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">💰 Financial Insights</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white p-4 rounded-lg">
                 <h3 class="text-sm font-semibold text-gray-600 mb-2">Average Billing Amount</h3>
@@ -320,7 +321,10 @@
         date_from: '{{ $dateFrom }}',
         date_to: '{{ $dateTo }}'
     });
-    window.location.href = '{{ route("admin.reports.revenueDetailPdf") }}?' + params.toString();
+    
+    // Open print preview page in new tab
+    const printUrl = '{{ route("admin.reports.printRevenueDetail") }}?' + params.toString();
+    window.open(printUrl, '_blank');
 }
 </script>
 @endsection
