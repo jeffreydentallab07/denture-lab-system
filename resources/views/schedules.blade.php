@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Schedules - Denture Reports</title>
+  <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -12,6 +14,7 @@
       font-family: Arial, sans-serif;
       display: flex;
     }
+
     .sidebar {
       width: 240px;
       background: url('pexels-olly-3779705.jpg') no-repeat center center;
@@ -23,6 +26,7 @@
       flex-direction: column;
       justify-content: space-between;
     }
+
     .sidebar a {
       display: flex;
       align-items: center;
@@ -30,19 +34,22 @@
       color: black;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(0,0,0,0.2);
+      border: 1px solid rgba(0, 0, 0, 0.2);
       margin: 4px 10px;
       border-radius: 8px;
-      background-color: rgba(255,255,255,0.7);
+      background-color: rgba(255, 255, 255, 0.7);
       transition: background-color 0.2s;
     }
+
     .sidebar a:hover {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
     }
+
     .sidebar a.active {
       background-color: #189ab4;
       color: white;
     }
+
     .content {
       margin-left: 240px;
       padding: 20px;
@@ -52,6 +59,7 @@
       min-height: 100vh;
       overflow-y: auto;
     }
+
     h1 {
       color: #05445e;
       font-size: 2.5rem;
@@ -59,12 +67,14 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
     .search-container {
       display: flex;
       justify-content: flex-end;
       margin-bottom: 1rem;
       gap: 0.5rem;
     }
+
     input[type="text"] {
       padding: 0.5rem 0.75rem;
       border: 1px solid #ccc;
@@ -73,9 +83,11 @@
       font-size: 0.875rem;
       outline-offset: 2px;
     }
+
     input[type="text"]:focus {
       outline: 2px solid #189ab4;
     }
+
     button.search-btn {
       background-color: #189ab4;
       color: white;
@@ -87,9 +99,11 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
+
     button.search-btn:hover {
       background-color: #127a95;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -98,34 +112,46 @@
       overflow: hidden;
       box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
     }
+
     thead tr {
       background-color: #189ab4;
       color: white;
       font-weight: 700;
     }
-    th, td {
+
+    th,
+    td {
       padding: 0.75rem 1rem;
       border-bottom: 1px solid #ddd;
       text-align: left;
       white-space: nowrap;
     }
+
     tbody tr:hover {
       background-color: transparent !important;
       cursor: default;
     }
+
     .busy {
-      color: #dc2626; /* red-600 */
+      color: #dc2626;
+      /* red-600 */
       font-weight: 600;
     }
+
     .available {
-      background-color: #d1fae5; /* green-100 */
+      background-color: #d1fae5;
+      /* green-100 */
     }
+
     .available-status {
-      color: #059669; /* green-600 */
+      color: #059669;
+      /* green-600 */
       font-weight: 600;
     }
+
     button.assign-btn {
-      color: #2563eb; /* blue-600 */
+      color: #2563eb;
+      /* blue-600 */
       background: none;
       border: none;
       padding: 0;
@@ -133,11 +159,13 @@
       cursor: pointer;
       transition: text-decoration 0.2s;
     }
+
     button.assign-btn:hover {
       text-decoration: underline;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Sidebar -->
@@ -149,14 +177,14 @@
       </div>
       <a href="{{ url('dashboard') }}" class="menu-link">🏠 Dashboard</a>
       <a href="{{ route('billing') }}" class="menu-link">💳 Billing</a>
-<a href="{{ url('appointments') }}" class="menu-link">📅 Appointments</a>
-<a href="{{ url('case-orders') }}" class="menu-link">📦 Case Orders</a>
-<a href="{{ url('deliveries') }}" class="menu-link">🚚 Deliveries</a>
-<a href="{{ url('invoices') }}" class="menu-link">🧾 Invoices</a>
-<a href="{{ url('departments') }}" class="menu-link">🏢 Departments</a>
-<a href="{{ route('technicians') }}" class="menu-link">🛠 Technicians</a>
-<a href="{{ route('riders') }}" class="menu-link">🚴 Riders</a>
-<a href="{{ route('clinics') }}" class="menu-link">🏥 Clinics</a>
+      <a href="{{ url('appointments') }}" class="menu-link">📅 Appointments</a>
+      <a href="{{ url('case-orders') }}" class="menu-link">📦 Case Orders</a>
+      <a href="{{ url('deliveries') }}" class="menu-link">🚚 Deliveries</a>
+      <a href="{{ url('invoices') }}" class="menu-link">🧾 Invoices</a>
+      <a href="{{ url('departments') }}" class="menu-link">🏢 Departments</a>
+      <a href="{{ route('technicians') }}" class="menu-link">🛠 Technicians</a>
+      <a href="{{ route('riders') }}" class="menu-link">🚴 Riders</a>
+      <a href="{{ route('clinics') }}" class="menu-link">🏥 Clinics</a>
 
     </div>
     <div class="p-4">
@@ -283,4 +311,5 @@
     });
   </script>
 </body>
+
 </html>

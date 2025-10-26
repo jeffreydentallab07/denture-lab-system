@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Departments - Staff Profiles</title>
+  <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -11,6 +13,7 @@
       margin: 0;
       background-color: #e7eaf0;
     }
+
     /* Sidebar styling */
     .sidebar {
       width: 240px;
@@ -23,6 +26,7 @@
       flex-direction: column;
       justify-content: space-between;
     }
+
     .sidebar a {
       display: flex;
       align-items: center;
@@ -30,19 +34,22 @@
       color: black;
       text-decoration: none;
       font-weight: bold;
-      border: 1px solid rgba(0,0,0,0.2);
+      border: 1px solid rgba(0, 0, 0, 0.2);
       margin: 4px 10px;
       border-radius: 8px;
-      background-color: rgba(255,255,255,0.7);
+      background-color: rgba(255, 255, 255, 0.7);
       transition: background-color 0.2s;
     }
+
     .sidebar a:hover {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
     }
+
     .sidebar a.active {
       background-color: #189ab4;
       color: white;
     }
+
     .sidebar-header {
       font-weight: bold;
       font-size: 1.25rem;
@@ -97,6 +104,7 @@
       border-radius: 0.75rem;
       background: white;
     }
+
     .profile-card.flipped .profile-card-inner {
       transform: rotateY(180deg);
     }
@@ -129,11 +137,13 @@
       margin-bottom: 1rem;
       border: 2px solid #189ab4;
     }
+
     .profile-name {
       font-weight: 700;
       font-size: 1.125rem;
       margin-bottom: 0.25rem;
     }
+
     .profile-position {
       color: #189ab4;
       font-weight: 600;
@@ -149,25 +159,28 @@
       line-height: 1.5;
       text-align: left;
     }
+
     .profile-card-back h3 {
       margin-bottom: 1rem;
       font-size: 1.25rem;
       font-weight: 700;
       text-align: center;
     }
+
     .profile-card-back p {
       margin: 0.2rem 0;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Sidebar -->
- 
-    </div>
-    <div class="p-4">
-      <button class="w-full p-2 bg-red-500 text-white rounded">Logout</button>
-    </div>
+
+  </div>
+  <div class="p-4">
+    <button class="w-full p-2 bg-red-500 text-white rounded">Logout</button>
+  </div>
   </div>
 
   <!-- Content -->
@@ -331,4 +344,5 @@
   </script>
 
 </body>
+
 </html>

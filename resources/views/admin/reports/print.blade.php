@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ ucfirst(str_replace('-', ' ', $reportType)) }} Report - {{ $dateFrom }} to {{ $dateTo }}</title>
+    <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
         @media print {
             .no-print {

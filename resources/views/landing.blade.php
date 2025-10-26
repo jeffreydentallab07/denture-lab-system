@@ -8,6 +8,7 @@
   <title>Denture Laboratory System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
   <style>
     @keyframes slideIn {
       0% {

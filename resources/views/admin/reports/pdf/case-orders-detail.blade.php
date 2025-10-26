@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Case Orders Report - Detailed Breakdown</title>
+    <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
