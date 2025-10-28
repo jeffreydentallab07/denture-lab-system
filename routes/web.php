@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 // =====================================================
 // CONTROLLERS
@@ -12,6 +13,9 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClinicAuthController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\Auth\DualAuthenticationController;
+use App\Models\User;
+
 
 // Admin Controllers
 use App\Http\Controllers\Admin\AdminController;
@@ -34,6 +38,7 @@ use App\Http\Controllers\Clinic\DentistsController as ClinicDentistsController;
 use App\Http\Controllers\Clinic\PatientsController as ClinicPatientsController;
 use App\Http\Controllers\Clinic\AppointmentsController as ClinicAppointmentsController;
 use App\Http\Controllers\Clinic\BillingController as ClinicBillingController;
+use App\Http\Controllers\Clinic\CaseOrderReviewController;
 use App\Http\Controllers\Clinic\NotificationController as ClinicNotificationController;
 
 // Technician Controllers
@@ -61,10 +66,12 @@ Route::get('/home', fn() => view('landing'))->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/login', [DualAuthenticationController::class, 'login']);
 });
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [DualAuthenticationController::class, 'logout'])
+    ->name('logout')
+    ->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -102,10 +109,22 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    // Case Orders Management
-    Route::resource('case-orders', AdminCaseOrdersController::class);
-    Route::put('/case-orders/{caseOrder}/approve', [AdminCaseOrdersController::class, 'approve'])->name('case-orders.approve');
-    Route::put('/case-orders/{id}/approve-and-assign', [AdminCaseOrdersController::class, 'approveAndAssign'])->name('case-orders.approve-and-assign');
+    // Case Orders
+    Route::get('/case-orders', [AdminCaseOrdersController::class, 'index'])->name('case-orders.index');
+    Route::get('/case-orders/{id}', [AdminCaseOrdersController::class, 'show'])->name('case-orders.show');
+    Route::delete('/case-orders/{id}', [AdminCaseOrdersController::class, 'destroy'])->name('case-orders.destroy');
+
+    // Pickup Management
+    Route::get('/case-orders/{id}/create-pickup', [AdminCaseOrdersController::class, 'createPickup'])->name('case-orders.create-pickup');
+    Route::post('/case-orders/{id}/store-pickup', [AdminCaseOrdersController::class, 'storePickup'])->name('case-orders.store-pickup');
+
+    // Appointment Management
+    Route::get('/case-orders/{id}/create-appointment', [AdminCaseOrdersController::class, 'createAppointment'])->name('case-orders.create-appointment');
+    Route::post('/case-orders/{id}/store-appointment', [AdminCaseOrdersController::class, 'storeAppointment'])->name('case-orders.store-appointment');
+
+    // Delivery Management
+    Route::get('/case-orders/{id}/create-delivery', [AdminCaseOrdersController::class, 'createDelivery'])->name('case-orders.create-delivery');
+    Route::post('/case-orders/{id}/store-delivery', [AdminCaseOrdersController::class, 'storeDelivery'])->name('case-orders.store-delivery');
 
     // Appointments Management
     Route::resource('appointments', AdminAppointmentsController::class);
@@ -187,7 +206,15 @@ Route::middleware(['auth:clinic'])->prefix('clinic')->name('clinic.')->group(fun
     Route::get('/billing/{billing}', [ClinicBillingController::class, 'show'])->name('billing.show');
 
     // Case Orders Management
-    Route::resource('new-case-orders', ClinicCaseOrdersController::class);
+    Route::resource('case-orders', ClinicCaseOrdersController::class);
+
+    // ✅ Case Order Review Routes
+    Route::get('/case-orders/{id}/review', [CaseOrderReviewController::class, 'show'])
+        ->name('case-orders.review');
+    Route::post('/case-orders/{id}/approve', [CaseOrderReviewController::class, 'approve'])
+        ->name('case-orders.approve');
+    Route::post('/case-orders/{id}/request-adjustment', [CaseOrderReviewController::class, 'requestAdjustment'])
+        ->name('case-orders.request-adjustment');
 
     // Appointments (View only)
     Route::resource('appointments', ClinicAppointmentsController::class);
@@ -256,9 +283,11 @@ Route::middleware(['auth', 'check.rider'])->prefix('rider')->name('rider.')->gro
 |--------------------------------------------------------------------------
 */
 
+
 Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
+    if (Auth::check()) {
+        /** @var User $user */
+        $user = Auth::user();
 
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
@@ -275,8 +304,7 @@ Route::get('/', function () {
         return redirect()->route('home');
     }
 
-    // Check clinic guard separately
-    if (auth('clinic')->check()) {
+    if (Auth::guard('clinic')->check()) {
         return redirect()->route('clinic.dashboard');
     }
 

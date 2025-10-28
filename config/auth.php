@@ -2,43 +2,44 @@
 
 return [
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Defaults
+    |--------------------------------------------------------------------------
+    */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => 'web',
+        'passwords' => 'users',
     ],
 
-
-
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Guards
+    |--------------------------------------------------------------------------
+    | Define every authentication guard for your application.
+    | A great default configuration has been defined for you here.
+    */
 
     'guards' => [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'admin' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'technician' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'rider' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+
         'clinic' => [
             'driver' => 'session',
             'provider' => 'clinics',
         ],
-        'staff' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | User Providers
+    |--------------------------------------------------------------------------
+    | Define how users are actually retrieved out of your database.
+    | Supports: "database", "eloquent"
+    */
 
     'providers' => [
         'users' => [
@@ -52,6 +53,11 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Resetting Passwords
+    |--------------------------------------------------------------------------
+    */
 
     'passwords' => [
         'users' => [
@@ -69,8 +75,12 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Password Confirmation Timeout
+    |--------------------------------------------------------------------------
+    */
 
-
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => 10800,
 
 ];

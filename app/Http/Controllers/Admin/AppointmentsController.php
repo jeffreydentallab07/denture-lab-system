@@ -52,7 +52,7 @@ class AppointmentsController extends Controller
 
         // Update case order status to 'in-progress'
         $caseOrder = CaseOrder::findOrFail($validated['case_order_id']);
-        $caseOrder->update(['status' => 'in-progress']);
+        $caseOrder->update(['status' => 'in progress']);
 
         // Notify the technician
         $technician = User::find($validated['technician_id']);

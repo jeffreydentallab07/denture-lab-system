@@ -23,8 +23,8 @@
         </div>
 
         <nav class="mt-4 flex-grow space-y-1">
-            <a href="{{ route('clinic.new-case-orders.index') }}"
-                class="flex items-center space-x-2 p-2 rounded-l-lg hover:bg-gray-300 hover:text-blue-900 {{ request()->routeIs('clinic.new-case-orders.*') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
+            <a href="{{ route('clinic.case-orders.index') }}"
+                class="flex items-center space-x-2 p-2 rounded-l-lg hover:bg-gray-300 hover:text-blue-900 {{ request()->routeIs('clinic.case-orders.*') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v12a2 2 0 01-2 2z" />
@@ -198,9 +198,8 @@
                             class="w-full text-left px-3 py-2 hover:bg-gray-300 text-[12px]">Settings</button>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="button"
-                                class="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-300 text-[12px]"
-                                onclick="window.location.href='{{ route('home') }}'">
+                            <button type="submit"
+                                class="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-300 text-[12px]">
                                 Sign out
                             </button>
                         </form>

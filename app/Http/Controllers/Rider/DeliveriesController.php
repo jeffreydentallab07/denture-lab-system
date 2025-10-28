@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
+use App\Models\CaseOrder;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -93,29 +94,45 @@ class DeliveriesController extends Controller
         // Update delivered_at timestamp when status changes to delivered
         if ($validated['delivery_status'] === 'delivered' && $oldStatus !== 'delivered') {
             $validated['delivered_at'] = now();
+
+            // ✅ Update case order status to "under review" when delivered
+            $caseOrder = $delivery->appointment->caseOrder;
+
+            // Check submission count
+            $submissionCount = $caseOrder->submission_count;
+
+            if ($submissionCount == 1) {
+                // First submission
+                $caseOrder->update(['status' => CaseOrder::STATUS_UNDER_REVIEW]);
+                $statusMessage = 'Initial submission delivered. Please review and approve or request adjustments.';
+            } else {
+                // Revision submission
+                $caseOrder->update(['status' => CaseOrder::STATUS_UNDER_REVIEW]);
+                $statusMessage = "Revision #{$submissionCount} delivered. Please review and approve or request further adjustments.";
+            }
         }
 
         $delivery->update($validated);
 
         // Notify clinic when status changes
         if ($oldStatus !== $validated['delivery_status']) {
-            $statusMessage = '';
+            $notifMessage = '';
             switch ($validated['delivery_status']) {
                 case 'in transit':
-                    $statusMessage = 'Your order is now in transit and will arrive soon.';
+                    $notifMessage = 'Your order is now in transit and will arrive soon.';
                     break;
                 case 'delivered':
-                    $statusMessage = 'Your order has been successfully delivered. Thank you for your business!';
+                    $notifMessage = $statusMessage ?? 'Your order has been successfully delivered.';
                     break;
             }
 
-            if ($statusMessage) {
+            if ($notifMessage) {
                 NotificationHelper::notifyClinic(
                     $delivery->appointment->caseOrder->clinic_id,
                     'delivery_status_update',
                     'Delivery Status Update',
-                    "Case order CASE-" . str_pad($delivery->appointment->case_order_id, 5, '0', STR_PAD_LEFT) . ": " . $statusMessage,
-                    route('clinic.appointments.show', $delivery->appointment_id),
+                    "Case order CASE-" . str_pad($delivery->appointment->case_order_id, 5, '0', STR_PAD_LEFT) . ": " . $notifMessage,
+                    route('clinic.case-orders.review', $delivery->appointment->case_order_id),
                     $delivery->delivery_id
                 );
             }

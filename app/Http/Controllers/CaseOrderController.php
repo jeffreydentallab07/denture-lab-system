@@ -44,7 +44,7 @@ class CaseOrderController extends Controller
         $caseTypes = ['Denture plastic', 'Jacket crowns/Porcelain', 'Retainers', 'Valplast Flexible'];
         $statuses = ['initial', 'in progress', 'completed', 'on hold', 'cancelled'];
 
-        return view('clinic.new-case-orders.index', compact('caseOrders', 'patients', 'caseTypes', 'statuses'));
+        return view('clinic.case-orders.index', compact('caseOrders', 'patients', 'caseTypes', 'statuses'));
     }
 
     // Create new case order (Clinic)

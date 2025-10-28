@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Material;
 use App\Models\MaterialUsage;
+use App\Models\CaseOrder;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -67,10 +68,10 @@ class TechnicianController extends Controller
 
     public function updateAppointment(Request $request, $id)
     {
-        $appointment = Appointment::where('technician_id', Auth::id())->findOrFail($id);
+        $appointment = Appointment::with('caseOrder')->where('technician_id', Auth::id())->findOrFail($id);
 
         $validated = $request->validate([
-            'work_status' => 'nullable|in:pending,in-progress,completed',
+            'work_status' => 'nullable|in:scheduled,in progress,completed',
             'material_id' => 'nullable|exists:materials,material_id',
         ]);
 
@@ -87,41 +88,45 @@ class TechnicianController extends Controller
                 NotificationHelper::notifyAdmins(
                     'appointment_status_updated',
                     'Appointment Status Updated',
-                    "Technician " . Auth::user()->name . " updated appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " status from '" . ucfirst(str_replace('-', ' ', $oldStatus)) . "' to '" . ucfirst(str_replace('-', ' ', $validated['work_status'])) . "'",
+                    "Technician " . Auth::user()->name . " updated appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " status from '" . ucfirst($oldStatus) . "' to '" . ucfirst($validated['work_status']) . "'",
                     route('admin.appointments.show', $appointment->appointment_id),
                     $appointment->appointment_id
                 );
             }
 
-            // If completed, update case order status and notify
-            if ($validated['work_status'] === 'completed') {
-                $appointment->caseOrder->update(['status' => 'completed']);
+            // If completed, keep case order as "in progress" (DO NOT mark as completed yet)
+            if ($validated['work_status'] === 'completed' && $oldStatus !== 'completed') {
 
-                // Notify admin about completion
+                // Notify admin about completion (so they can create delivery)
                 NotificationHelper::notifyAdmins(
                     'appointment_completed',
-                    'Appointment Completed',
-                    "Appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " for case CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " has been completed by " . Auth::user()->name,
-                    route('admin.appointments.show', $appointment->appointment_id),
+                    'Appointment Completed - Ready for Delivery',
+                    "Appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " for case CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " has been completed by " . Auth::user()->name . ". Please create a delivery.",
+                    route('admin.case-orders.show', $appointment->caseOrder->co_id),
                     $appointment->appointment_id
                 );
 
-                // Notify clinic about completion
+                // Notify clinic about completion (work is done, waiting for delivery)
                 NotificationHelper::notifyClinic(
                     $appointment->caseOrder->clinic_id,
-                    'appointment_completed',
-                    'Your Case Order is Complete',
-                    "Case order CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " has been completed. The work is ready for pickup or delivery.",
-                    route('clinic.appointments.index'),
+                    'work_completed',
+                    'Work Completed - Pending Delivery',
+                    "The work on your case order CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " has been completed. It will be delivered to you soon.",
+                    route('clinic.case-orders.show', $appointment->caseOrder->co_id),
                     $appointment->appointment_id
                 );
             }
 
-            // If work started (changed to in-progress)
-            if ($validated['work_status'] === 'in-progress' && $oldStatus === 'pending') {
+            // If work started (changed to in progress)
+            if ($validated['work_status'] === 'in progress' && $oldStatus !== 'in progress') {
+                // Update case order status to "in progress" if it's not already
+                if (!in_array($appointment->caseOrder->status, ['in progress', 'revision in progress'])) {
+                    $appointment->caseOrder->update(['status' => CaseOrder::STATUS_IN_PROGRESS]);
+                }
+
                 // Notify admin that work has started
                 NotificationHelper::notifyAdmins(
-                    'appointment_in_progress',
+                    'work_started',
                     'Work Started',
                     "Technician " . Auth::user()->name . " has started work on appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT),
                     route('admin.appointments.show', $appointment->appointment_id),
@@ -131,10 +136,10 @@ class TechnicianController extends Controller
                 // Notify clinic that work has started
                 NotificationHelper::notifyClinic(
                     $appointment->caseOrder->clinic_id,
-                    'appointment_in_progress',
+                    'work_started',
                     'Work in Progress',
                     "Your case order CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " is now being worked on by our technician.",
-                    route('clinic.appointments.index'),
+                    route('clinic.case-orders.show', $appointment->caseOrder->co_id),
                     $appointment->appointment_id
                 );
             }

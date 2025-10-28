@@ -1,370 +1,469 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="p-6 bg-gray-100 min-h-screen">
-    <div class="max-w-6xl mx-auto">
+@section('page-title', 'Case Order Details')
 
-        <a href="{{ route('admin.case-orders.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
-            ← Back to Case Orders
-        </a>
+@section('content')
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="{{ route('admin.case-orders.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">
+                    ← Back
+                </a>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    Case Order: CASE-{{ str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT) }}
+                </h1>
+            </div>
+
+            <!-- Status Badge -->
+            <div>
+                @php
+                $statusColors = [
+                'pending' => 'bg-gray-100 text-gray-800', 'for appointment' => 'bg-blue-50 text-blue-700',
+                'in progress' => 'bg-blue-100 text-blue-800',
+                'under review' => 'bg-purple-100 text-purple-800',
+                'adjustment requested' => 'bg-orange-100 text-orange-800',
+                'revision in progress' => 'bg-yellow-100 text-yellow-800',
+                'completed' => 'bg-green-100 text-green-800',
+                ];
+                @endphp
+                <span
+                    class="px-4 py-2 rounded-full text-sm font-semibold {{ $statusColors[$caseOrder->status] ?? 'bg-gray-100 text-gray-800' }}">
+                    {{ ucfirst($caseOrder->status) }}
+                </span>
+            </div>
+        </div>
 
         @if(session('success'))
-        <div class="mb-4 p-3 rounded bg-green-100 text-green-700 border border-green-300">
+        <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded">
             {{ session('success') }}
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+            {{ session('error') }}
+        </div>
+        @endif
+
+        <!-- Action Alert for Pending Orders -->
+        @if($caseOrder->status === 'pending')
+        <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        <strong>Action Required:</strong> Create a pickup and assign a rider to pick up this case order
+                        from the clinic.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Action Alert for Pickup Completed -->
+        @if($caseOrder->latestPickup && $caseOrder->latestPickup->status === 'picked up' &&
+        (!$caseOrder->latestAppointment || $caseOrder->latestAppointment->work_status === 'completed'))
+        <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        <strong>Next Step:</strong> Pickup completed! Create an appointment and assign a technician to
+                        work on this case.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Action Alert for Work Completed -->
+        @if($caseOrder->latestAppointment && $caseOrder->latestAppointment->work_status === 'completed' &&
+        !$caseOrder->latestAppointment->delivery)
+        <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">
+                        <strong>Next Step:</strong> Work completed! Create a delivery and assign a rider to deliver to
+                        the clinic.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Action Alert for Adjustment Requested -->
+        @if($caseOrder->status === 'adjustment requested')
+        <div class="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-orange-700">
+                        <strong>Adjustment Requested:</strong> The clinic has requested adjustments. Create a new pickup
+                        to start the revision process.
+                    </p>
+                </div>
+            </div>
         </div>
         @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- Main Details -->
+            <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
 
-                <!-- Case Order Info -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-900 to-blue-700 p-6 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h1 class="text-3xl font-bold">CASE-{{ str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT)
-                                    }}</h1>
-                                <p class="text-blue-100 mt-2">{{ $caseOrder->case_type }}</p>
-                            </div>
-                            <span
-                                class="px-4 py-2 text-sm rounded-full font-semibold
-                                {{ $caseOrder->status === 'initial' ? 'bg-yellow-500 text-white' : 
-                                   ($caseOrder->status === 'for pickup' ? 'bg-blue-500 text-white' : 
-                                   ($caseOrder->status === 'for appointment' ? 'bg-purple-500 text-white' : 
-                                   ($caseOrder->status === 'in-progress' ? 'bg-indigo-500 text-white' : 
-                                   ($caseOrder->status === 'completed' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white')))) }}">
-                                {{ ucfirst(str_replace('-', ' ', $caseOrder->status)) }}
-                            </span>
-                        </div>
-                    </div>
-
+                <!-- Case Details Card -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Case Information</h2>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Case Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm text-gray-500">Case Number</p>
-                                <p class="text-lg font-semibold text-gray-800">CASE-{{ str_pad($caseOrder->co_id, 5,
-                                    '0', STR_PAD_LEFT) }}</p>
+                                <p class="text-sm text-gray-500">Case ID</p>
+                                <p class="font-bold text-blue-600">CASE-{{ str_pad($caseOrder->co_id, 5, '0',
+                                    STR_PAD_LEFT) }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Case Type</p>
-                                <p class="text-lg font-semibold text-gray-800">{{ $caseOrder->case_type }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Status</p>
-                                <p class="text-lg font-semibold text-gray-800">{{ ucfirst(str_replace('-', ' ',
-                                    $caseOrder->status)) }}</p>
+                                <p class="font-medium">{{ ucfirst($caseOrder->case_type) }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Created Date</p>
-                                <p class="text-lg font-semibold text-gray-800">{{ $caseOrder->created_at->format('M d,
-                                    Y') }}</p>
+                                <p class="font-medium">{{ $caseOrder->created_at->format('F j, Y g:i A') }}</p>
                             </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Last Updated</p>
+                                <p class="font-medium">{{ $caseOrder->updated_at->format('F j, Y g:i A') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Submission Count</p>
+                                <p class="font-medium">{{ $caseOrder->submission_count }}</p>
+                            </div>
+                            @if($caseOrder->latest_delivery && $caseOrder->latest_delivery->delivered_at)
+                            <div>
+                                <p class="text-sm text-gray-500">Last Delivered</p>
+                                <p class="font-medium">{{ $caseOrder->latest_delivery->delivered_at->format('M j, Y g:i
+                                    A') }}</p>
+                            </div>
+                            @endif
                         </div>
 
                         @if($caseOrder->notes)
-                        <div class="mt-4 pt-4 border-t">
-                            <p class="text-sm text-gray-500 mb-2">Notes / Instructions</p>
-                            <p class="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-line">{{ $caseOrder->notes }}
-                            </p>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Clinic Information -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Clinic Information</h2>
-
-                    <div class="flex items-center gap-4 mb-4">
-                        <img src="{{ $caseOrder->clinic->profile_photo ? asset('storage/' . $caseOrder->clinic->profile_photo) : asset('images/default-clinic.png') }}"
-                            alt="{{ $caseOrder->clinic->clinic_name }}"
-                            class="w-16 h-16 rounded-full object-cover border-2">
-                        <div>
-                            <p class="text-lg font-semibold text-gray-800">{{ $caseOrder->clinic->clinic_name }}</p>
-                            <p class="text-sm text-gray-600">{{ $caseOrder->clinic->email }}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p class="text-gray-500">Contact</p>
-                            <p class="text-gray-800">{{ $caseOrder->clinic->contact_number ?? 'N/A' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Address</p>
-                            <p class="text-gray-800">{{ $caseOrder->clinic->address ?? 'N/A' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Patient & Dentist -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Patient & Dentist</h2>
-
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-2">Patient</p>
-                            <p class="text-lg font-semibold text-gray-800">{{ $caseOrder->patient->name ?? 'N/A' }}</p>
-                            @if($caseOrder->patient)
-                            <p class="text-sm text-gray-600 mt-1">{{ $caseOrder->patient->contact_number ?? '' }}</p>
-                            @endif
-                        </div>
-
-                        <div>
-                            <p class="text-sm text-gray-500 mb-2">Dentist</p>
-                            <p class="text-lg font-semibold text-gray-800">Dr. {{ $caseOrder->dentist->name ?? 'N/A' }}
-                            </p>
-                            @if($caseOrder->dentist)
-                            <p class="text-sm text-gray-600 mt-1">{{ $caseOrder->dentist->contact_number ?? '' }}</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pickup Information (if assigned) -->
-                @if($caseOrder->status === 'for pickup' || $caseOrder->status === 'for appointment' ||
-                $caseOrder->pickup)
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Pickup Information</h2>
-
-                    @if($caseOrder->pickup)
-                    <div class="flex items-center gap-4 mb-4">
-                        <img src="{{ $caseOrder->pickup->rider->photo ? asset('storage/' . $caseOrder->pickup->rider->photo) : asset('images/default-avatar.png') }}"
-                            alt="{{ $caseOrder->pickup->rider->name }}"
-                            class="w-12 h-12 rounded-full object-cover border-2">
-                        <div>
-                            <p class="text-sm text-gray-500">Assigned Rider</p>
-                            <p class="text-lg font-semibold text-gray-800">{{ $caseOrder->pickup->rider->name }}</p>
-                            <p class="text-sm text-gray-600">{{ $caseOrder->pickup->rider->contact_number }}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p class="text-gray-500">Pickup Status</p>
-                            <span
-                                class="inline-block mt-1 px-2 py-1 text-xs rounded-full font-medium
-            {{ $caseOrder->pickup->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                {{ $caseOrder->pickup->status === 'pending' ? 'Pending Pickup' : 'Picked Up & Delivered'
-                                }}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Pickup Date</p>
-                            <p class="text-gray-800">{{ $caseOrder->pickup->pickup_date ?
-                                \Carbon\Carbon::parse($caseOrder->pickup->pickup_date)->format('M d, Y') : 'Not set' }}
-                            </p>
-                        </div>
-                        @if($caseOrder->pickup->picked_up_at)
-                        <div>
-                            <p class="text-gray-500">Picked Up At</p>
-                            <p class="text-gray-800">{{ $caseOrder->pickup->picked_up_at->format('M d, Y h:i A') }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    @else
-                    <p class="text-gray-500">No pickup assigned yet.</p>
-                    @endif
-                </div>
-                @endif
-
-                <!-- Appointments -->
-                @if($caseOrder->appointments->count() > 0)
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Appointments</h2>
-
-                    <div class="space-y-3">
-                        @foreach($caseOrder->appointments as $appointment)
-                        <div class="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-semibold text-gray-800">{{ $appointment->schedule_datetime->format('M
-                                        d, Y h:i A') }}</p>
-                                    <p class="text-sm text-gray-600">Technician: {{ $appointment->technician->name ??
-                                        'Not assigned' }}</p>
-                                    <p class="text-sm text-gray-600">Purpose: {{ $appointment->purpose ?? 'N/A' }}</p>
-                                </div>
-                                <span
-                                    class="px-2 py-1 text-xs rounded-full 
-                                    {{ $appointment->work_status === 'completed' ? 'bg-green-100 text-green-800' : 
-                                       ($appointment->work_status === 'in-progress' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                    {{ ucfirst($appointment->work_status) }}
-                                </span>
+                        <div class="mt-6">
+                            <p class="text-sm text-gray-500 mb-2">Notes / History</p>
+                            <div class="p-4 bg-gray-50 rounded-lg text-sm whitespace-pre-line">{{ $caseOrder->notes }}
                             </div>
                         </div>
-                        @endforeach
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Clinic, Patient & Dentist Card -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-green-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Clinic, Patient & Dentist Information
+                        </h3>
+
+                        <!-- Clinic -->
+                        <div class="border-l-4 border-blue-500 pl-4 mb-4">
+                            <p class="text-sm font-semibold text-gray-500 uppercase">Clinic</p>
+                            <p class="font-bold text-lg">{{ $caseOrder->clinic->clinic_name }}</p>
+                            <p class="text-sm text-gray-600">{{ $caseOrder->clinic->email }}</p>
+                            <p class="text-sm text-gray-600">{{ $caseOrder->clinic->contact_number }}</p>
+                            @if($caseOrder->clinic->address)
+                            <p class="text-sm text-gray-600 mt-1">📍 {{ $caseOrder->clinic->address }}</p>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Patient -->
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">Patient</p>
+                                <p class="font-bold">{{ $caseOrder->patient->name }}</p>
+                                <p class="text-sm text-gray-600">{{ $caseOrder->patient->email }}</p>
+                                <p class="text-sm text-gray-600">{{ $caseOrder->patient->contact_number }}</p>
+                            </div>
+
+                            <!-- Dentist -->
+                            <div class="border-l-4 border-purple-500 pl-4">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">Dentist</p>
+                                <p class="font-bold">{{ $caseOrder->dentist->name }}</p>
+                                <p class="text-sm text-gray-600">{{ $caseOrder->dentist->email }}</p>
+                                <p class="text-sm text-gray-600">{{ $caseOrder->dentist->contact_number }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Timeline -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Appointments & Work History
+                        </h3>
+
+                        @if($caseOrder->appointments->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($caseOrder->appointments->sortByDesc('created_at') as $index => $appointment)
+                            <div
+                                class="border-l-4 {{ $appointment->work_status === 'delivered' ? 'border-green-500' : ($appointment->work_status === 'completed' ? 'border-blue-500' : 'border-yellow-500') }} pl-4 pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold">Appointment #{{ $caseOrder->appointments->count() - $index
+                                            }}</p>
+                                        <p class="text-sm text-gray-600">{{ $appointment->purpose ?? 'General Work' }}
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-1 rounded text-xs font-semibold
+                                            {{ $appointment->work_status === 'delivered' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $appointment->work_status === 'completed' ? 'bg-blue-100 text-blue-800' : '' }}
+                                            {{ $appointment->work_status === 'in progress' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $appointment->work_status === 'scheduled' ? 'bg-gray-100 text-gray-800' : '' }}
+                                        ">
+                                        {{ ucfirst($appointment->work_status) }}
+                                    </span>
+                                </div>
+
+                                <div class="mt-2 text-sm text-gray-600 space-y-1">
+                                    <p><strong>Technician:</strong> {{ $appointment->technician->name }}</p>
+                                    <p><strong>Scheduled:</strong> {{ $appointment->schedule_datetime->format('F j, Y
+                                        g:i A') }}</p>
+
+                                    @if($appointment->delivery)
+                                    <p><strong>Delivery Status:</strong>
+                                        <span
+                                            class="font-semibold {{ $appointment->delivery->delivery_status === 'delivered' ? 'text-green-600' : 'text-orange-600' }}">
+                                            {{ ucfirst($appointment->delivery->delivery_status) }}
+                                        </span>
+                                    </p>
+                                    @if($appointment->delivery->delivered_at)
+                                    <p><strong>Delivered:</strong> {{ $appointment->delivery->delivered_at->format('M j,
+                                        Y g:i A') }}</p>
+                                    @endif
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="text-center text-gray-500 py-8">No appointments scheduled yet</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Pickup History -->
+                @if($caseOrder->pickups && $caseOrder->pickups->count() > 0)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            Pickup History
+                        </h3>
+                        <div class="space-y-4">
+                            @foreach($caseOrder->pickups->sortByDesc('created_at') as $pickup)
+                            <div class="border-l-4 border-orange-500 pl-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold">Pickup #{{ $loop->iteration }}</p>
+                                        <p class="text-sm text-gray-600">{{ $pickup->pickup_date->format('F j, Y') }}
+                                        </p>
+                                    </div>
+                                    <span
+                                        class="px-2 py-1 rounded text-xs font-semibold
+                                        {{ $pickup->status === 'picked up' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                        {{ ucfirst($pickup->status) }}
+                                    </span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    <p><strong>Rider:</strong> {{ $pickup->rider->name }}</p>
+                                    @if($pickup->picked_up_at)
+                                    <p><strong>Picked Up:</strong> {{ $pickup->picked_up_at->format('M j, Y g:i A') }}
+                                    </p>
+                                    @endif
+                                    @if($pickup->notes)
+                                    <p><strong>Notes:</strong> {{ $pickup->notes }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 @endif
 
             </div>
 
-            <!-- Sidebar Actions -->
+            <!-- Sidebar -->
             <div class="space-y-6">
 
                 <!-- Quick Actions -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Actions</h3>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                        <div class="space-y-2">
 
-                    <div class="space-y-3">
-                        <!-- Approve & Assign Rider (if initial) -->
-                        @if($caseOrder->status === 'initial')
-                        <button onclick="openAssignRiderModal()"
-                            class="block w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700 transition">
-                            Approve & Assign Rider
-                        </button>
-                        @endif
+                            @if(in_array($caseOrder->status, ['pending', 'adjustment requested']))
+                            <!-- Create Pickup -->
+                            <a href="{{ route('admin.case-orders.create-pickup', $caseOrder->co_id) }}"
+                                class="block w-full bg-orange-600 hover:bg-orange-700 text-white text-center font-bold py-2 px-4 rounded-lg transition">
+                                🚚 Create Pickup
+                            </a>
+                            @endif
 
-                        <!-- Create Appointment (if for appointment) -->
-                        @if($caseOrder->status === 'for appointment')
-                        <a href="{{ route('admin.appointments.create', ['case_order' => $caseOrder->co_id]) }}"
-                            class="block w-full bg-purple-600 text-white text-center py-2 rounded-lg hover:bg-purple-700 transition">
-                            Create Appointment
-                        </a>
-                        @endif
+                            @if($caseOrder->status === 'for appointment')
+                            <!-- Create Appointment -->
+                            <a href="{{ route('admin.case-orders.create-appointment', $caseOrder->co_id) }}"
+                                class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded-lg transition">
+                                📅 Create Appointment
+                            </a>
+                            @endif
 
-                        <!-- Edit -->
-                        <a href="{{ route('admin.case-orders.edit', $caseOrder) }}"
-                            class="block w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition">
-                            Edit Case Order
-                        </a>
+                            @if($caseOrder->latestAppointment && $caseOrder->latestAppointment->work_status ===
+                            'completed' && !$caseOrder->latestAppointment->delivery)
+                            <!-- Create Delivery -->
+                            <a href="{{ route('admin.case-orders.create-delivery', $caseOrder->co_id) }}"
+                                class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-bold py-2 px-4 rounded-lg transition">
+                                🚛 Create Delivery
+                            </a>
+                            @endif
 
-                        <!-- Delete -->
-                        <button onclick="confirmDelete()"
-                            class="block w-full bg-red-600 text-white text-center py-2 rounded-lg hover:bg-red-700 transition">
-                            Delete Case Order
-                        </button>
+                            <a href="{{ route('admin.case-orders.index') }}"
+                                class="block w-full bg-gray-600 hover:bg-gray-700 text-white text-center font-bold py-2 px-4 rounded-lg transition">
+                                ← Back to List
+                            </a>
+
+                        </div>
                     </div>
                 </div>
 
-                <!-- Timeline -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Timeline</h3>
+                <!-- Status Timeline -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-4">Status Timeline</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-8 w-8 rounded-full {{ $caseOrder->status === 'completed' ? 'bg-green-500' : 'bg-gray-300' }} flex items-center justify-center">
+                                    @if($caseOrder->status === 'completed')
+                                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    @endif
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">Completed</p>
+                                    <p class="text-xs text-gray-500">Final stage</p>
+                                </div>
+                            </div>
 
-                    <div class="space-y-4">
-                        <div class="flex gap-3">
-                            <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">Created</p>
-                                <p class="text-xs text-gray-500">{{ $caseOrder->created_at->format('M d, Y h:i A') }}
-                                </p>
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-8 w-8 rounded-full {{ in_array($caseOrder->status, ['under review', 'adjustment requested', 'revision in progress', 'completed']) ? 'bg-purple-500' : 'bg-gray-300' }} flex items-center justify-center">
+                                    @if(in_array($caseOrder->status, ['under review', 'adjustment requested', 'revision
+                                    in progress', 'completed']))
+                                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    @endif
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">Under Review</p>
+                                    <p class="text-xs text-gray-500">Awaiting approval</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-8 w-8 rounded-full {{ in_array($caseOrder->status, ['in progress', 'under review', 'adjustment requested', 'revision in progress', 'completed']) ? 'bg-blue-500' : 'bg-gray-300' }} flex items-center justify-center">
+                                    @if(in_array($caseOrder->status, ['in progress', 'under review', 'adjustment
+                                    requested', 'revision in progress', 'completed']))
+                                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    @endif
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">In Progress</p>
+                                    <p class="text-xs text-gray-500">Work started</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div
+                                    class="flex-shrink-0 h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">Created</p>
+                                    <p class="text-xs text-gray-500">{{ $caseOrder->created_at->format('M j, Y') }}</p>
+                                </div>
                             </div>
                         </div>
-
-                        @if($caseOrder->status !== 'initial')
-                        <div class="flex gap-3">
-                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">Status: {{ ucfirst(str_replace('-', ' ',
-                                    $caseOrder->status)) }}</p>
-                                <p class="text-xs text-gray-500">{{ $caseOrder->updated_at->format('M d, Y h:i A') }}
-                                </p>
-                            </div>
-                        </div>
-                        @endif
                     </div>
                 </div>
 
             </div>
+
         </div>
 
     </div>
 </div>
-
-<!-- Assign Rider Modal -->
-<div id="assignRiderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Approve & Assign Rider</h3>
-
-        <form action="{{ route('admin.case-orders.approve-and-assign', $caseOrder->co_id) }}" method="POST">
-            @csrf
-            @method('PUT')
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Select Rider</label>
-                <select name="rider_id" required
-                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
-                    <option value="">-- Select Rider --</option>
-                    @foreach($riders as $rider)
-                    <option value="{{ $rider->id }}">{{ $rider->name }} - {{ $rider->contact_number }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Pickup Date (Optional)</label>
-                <input type="date" name="pickup_date" min="{{ date('Y-m-d') }}"
-                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                <textarea name="notes" rows="3"
-                    class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none"
-                    placeholder="Any special instructions for pickup..."></textarea>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeAssignRiderModal()"
-                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
-                    Cancel
-                </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Approve & Assign
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Delete</h3>
-        <p class="text-gray-600 mb-6">Are you sure you want to delete this case order? This action cannot be undone.</p>
-
-        <div class="flex justify-end gap-3">
-            <button onclick="closeDeleteModal()"
-                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
-                Cancel
-            </button>
-            <form action="{{ route('admin.case-orders.destroy', $caseOrder) }}" method="POST" class="inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    Delete
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openAssignRiderModal() {
-    document.getElementById('assignRiderModal').classList.remove('hidden');
-}
-
-function closeAssignRiderModal() {
-    document.getElementById('assignRiderModal').classList.add('hidden');
-}
-
-function confirmDelete() {
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeAssignRiderModal();
-        closeDeleteModal();
-    }
-});
-</script>
 @endsection

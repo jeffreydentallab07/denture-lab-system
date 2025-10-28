@@ -79,7 +79,7 @@ class DeliveryController extends Controller
             $appointment->caseOrder->clinic_id,
             'delivery_scheduled',
             'Delivery Scheduled',
-            "Your completed case order CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " will be delivered on " . \Carbon\Carbon::parse($validated['delivery_date'])->format('M d, Y') . ". Our rider will contact you soon.",
+            "Your case order CASE-" . str_pad($appointment->case_order_id, 5, '0', STR_PAD_LEFT) . " will be delivered on " . \Carbon\Carbon::parse($validated['delivery_date'])->format('M d, Y') . ". Our rider will contact you soon.",
             route('clinic.appointments.show', $appointment->appointment_id),
             $delivery->delivery_id
         );

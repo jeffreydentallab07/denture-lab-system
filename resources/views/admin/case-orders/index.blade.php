@@ -41,14 +41,20 @@
                     </td>
                     <td class="px-6 py-3">{{ $caseOrder->case_type }}</td>
                     <td class="px-6 py-3">
+                        @php
+                        $statusColors = [
+                        'pending' => 'bg-gray-100 text-gray-800', 'for appointment' => 'bg-blue-50 text-blue-700',
+                        'in progress' => 'bg-blue-100 text-blue-800',
+                        'under review' => 'bg-purple-100 text-purple-800',
+                        'adjustment requested' => 'bg-orange-100 text-orange-800',
+                        'revision in progress' => 'bg-yellow-100 text-yellow-800',
+                        'completed' => 'bg-green-100 text-green-800',
+                        ];
+                        @endphp
+
                         <span
-                            class="px-2 py-1 text-xs rounded-full font-medium
-                            {{ $caseOrder->status === 'initial' ? 'bg-yellow-100 text-yellow-800' : 
-                               ($caseOrder->status === 'for pickup' ? 'bg-blue-100 text-blue-800' : 
-                               ($caseOrder->status === 'for appointment' ? 'bg-purple-100 text-purple-800' : 
-                               ($caseOrder->status === 'in-progress' ? 'bg-indigo-100 text-indigo-800' : 
-                               ($caseOrder->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')))) }}">
-                            {{ ucfirst(str_replace('-', ' ', $caseOrder->status)) }}
+                            class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusColors[$caseOrder->status] ?? 'bg-gray-100 text-gray-800' }}">
+                            {{ ucfirst($caseOrder->status) }}
                         </span>
                     </td>
                     <td class="px-6 py-3 text-xs text-gray-500">
