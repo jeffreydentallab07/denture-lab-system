@@ -13,8 +13,7 @@ class DentistsController extends Controller
     public function index()
     {
         $clinic = Auth::guard('clinic')->user();
-        $dentists = Dentist::where('clinic_id', $clinic->clinic_id)->latest()->get();
-
+        $dentists = Dentist::where('clinic_id', $clinic->clinic_id)->latest()->paginate(10);
         return view('clinic.dentists.index', compact('dentists'));
     }
 

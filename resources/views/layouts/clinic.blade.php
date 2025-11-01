@@ -163,18 +163,17 @@
                                 <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9">
-                                    </path>
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" />
                                 </svg>
-                                <p class="text-sm">No notifications</p>
+                                <p class="text-sm">No notifications yet</p>
                             </div>
                             @endif
                         </div>
 
                         @if(isset($clinicNotifications) && $clinicNotifications->count() > 0)
-                        <div class="p-2 border-t border-gray-200 text-center bg-gray-50 rounded-b-xl">
+                        <div class="p-2 border-t border-gray-200">
                             <a href="{{ route('clinic.notifications.index') }}"
-                                class="text-xs font-medium text-blue-900 hover:text-blue-700">
+                                class="block text-center text-blue-600 hover:text-blue-800 text-sm font-medium py-2">
                                 View All Notifications
                             </a>
                         </div>
@@ -183,26 +182,62 @@
                 </div>
 
 
-                <div class="relative">
+                <div id="userDropdownContainer" class="relative">
                     <button id="userDropdownBtn"
-                        class="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-300 text-[12px]">
+                        class="flex items-center space-x-1 rounded-lg hover:bg-gray-300 transition p-1">
+                        @if(Auth::guard('clinic')->user()->profile_photo)
+                        <img src="{{ asset('storage/' . Auth::guard('clinic')->user()->profile_photo) }}"
+                            alt="User Photo" class="w-6 h-6 rounded-full object-cover">
+                        @else
                         <div
-                            class="w-6 h-6 bg-blue-600 text-white flex items-center justify-center rounded-full font-bold text-[10px]">
-                            {{ strtoupper(substr(Auth::guard('clinic')->user()->clinic_name, 0, 2)) }}
+                            class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs">
+                            {{ strtoupper(substr(Auth::guard('clinic')->user()->username, 0, 1)) }}
                         </div>
-                        <span>{{ Auth::guard('clinic')->user()->clinic_name }}</span>
+                        @endif
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-700" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
+
                     <div id="userDropdownMenu"
-                        class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-md border hidden z-50">
-                        <button id="openClinicSettingsBtn"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-300 text-[12px]">Settings</button>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                class="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-300 text-[12px]">
-                                Sign out
-                            </button>
-                        </form>
+                        class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
+                        <div class="p-3 border-b border-gray-200">
+                            <p class="text-sm font-semibold text-gray-700">
+                                {{ Auth::guard('clinic')->user()->username }}
+                            </p>
+                            <p class="text-xs text-gray-500">{{ Auth::guard('clinic')->user()->email }}</p>
+                        </div>
+
+                        <ul class="py-2">
+                            <li>
+                                <button id="openClinicSettingsBtn"
+                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Settings
+                                </button>
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -217,133 +252,160 @@
     </div>
 
 
+    <!-- Clinic Settings Modal -->
     <div id="clinicSettingsModal"
-        class="hidden fixed inset-0 bg-gray-300 bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden relative">
+        class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
 
             <!-- Header -->
-            <div class="p-6 border-b border-gray-300 flex items-center justify-between">
-                <h2 class="text-2xl font-semibold text-gray-300">Clinic Settings</h2>
-                <button onclick="closeModal('clinicSettingsModal')"
-                    class="text-gray-300 hover:text-gray-300 text-2xl">&times;</button>
-            </div>
-
-            <!-- Section Title -->
-            <div class="flex border-b border-gray-300 px-6 py-2 bg-blue-900 text-white">
-                <span class="px-4 py-2 border-b-2 border-white font-medium">Clinic Details</span>
-            </div>
-
-            <!-- Form -->
-            <div class="p-6 space-y-6">
-                <form method="POST" action="{{ route('clinic.settings.update') }}" enctype="multipart/form-data"
-                    class="space-y-6">
-                    @csrf
-                    @method('PUT')
-
-                    <!-- Photo Upload -->
+            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+                <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <div class="relative">
                             <img id="previewClinicPhoto"
-                                class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
+                                class="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md"
                                 src="{{ Auth::guard('clinic')->user()->profile_photo ? asset('storage/' . Auth::guard('clinic')->user()->profile_photo) : 'https://via.placeholder.com/150' }}"
-                                alt="Clinic Photo">
-                            <input type="file" name="profile_photo" accept="image/*"
-                                class="absolute bottom-0 right-0 text-xs opacity-0 cursor-pointer w-20 h-20"
-                                onchange="previewClinicImage(event)">
+                                alt="Clinic Profile">
+                            <label
+                                class="absolute bottom-0 right-0 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-100">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <input type="file" form="clinicSettingsForm" name="profile_photo" accept="image/*"
+                                    class="hidden" onchange="previewClinicImage(event)">
+                            </label>
                         </div>
                         <div>
-                            <p class="text-gray-700 font-medium">Clinic Photo</p>
-                            <p class="text-sm text-gray-500">Upload a new photo if you want to change it.</p>
+                            <h2 class="text-xl font-bold text-white">Clinic Settings</h2>
+                            <p class="text-sm text-blue-100">Manage your profile and security</p>
                         </div>
                     </div>
-
-                    <!-- Text Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Clinic Name</label>
-                            <input type="text" name="clinic_name"
-                                value="{{ old('clinic_name', Auth::guard('clinic')->user()->clinic_name) }}"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2"
-                                required>
-                            @error('clinic_name')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email"
-                                value="{{ old('email', Auth::guard('clinic')->user()->email) }}"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2"
-                                required>
-                            @error('email')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Contact Number</label>
-                            <input type="text" name="contact_number"
-                                value="{{ old('contact_number', Auth::guard('clinic')->user()->contact_number ?? '') }}"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2">
-                            @error('contact_number')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Address</label>
-                            <input type="text" name="address"
-                                value="{{ old('address', Auth::guard('clinic')->user()->address ?? '') }}"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2">
-                            @error('address')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <!-- Password Fields (Optional) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">New Password (Optional)</label>
-                            <input type="password" name="password"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2"
-                                placeholder="Leave blank to keep current password">
-                            @error('password')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                            <input type="password" name="password_confirmation"
-                                class="mt-1 block w-full border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none text-lg py-2"
-                                placeholder="Confirm new password">
-                        </div>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="flex justify-end space-x-4 mt-4">
-                        <a href="{{ route('clinic.dashboard') }}"
-                            class="py-2 px-4 rounded-md text-gray-700 font-medium hover:bg-gray-100 border">Cancel</a>
-                        <button type="submit"
-                            class="py-2 px-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 shadow-md">Save
-                            Changes</button>
-                    </div>
-                </form>
+                    <button onclick="closeModal('clinicSettingsModal')" class="text-white hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <script>
-                function previewClinicImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewClinicPhoto').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-}
-            </script>
+            <!-- Form -->
+            <form id="clinicSettingsForm" method="POST" action="{{ route('clinic.settings.update') }}"
+                enctype="multipart/form-data" class="p-8 space-y-6">
+                @csrf
+                @method('PUT')
+
+                <!-- Profile Section -->
+                <div class="space-y-6">
+                    <div class="flex items-center gap-2 pb-2 border-b-2 border-blue-600">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <h3 class="text-lg font-bold text-gray-800">Profile Information</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Clinic Name <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="clinic_name"
+                                value="{{ old('clinic_name', Auth::guard('clinic')->user()->clinic_name) }}" required
+                                placeholder="Enter clinic name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            @error('clinic_name')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email <span
+                                    class="text-red-500">*</span></label>
+                            <input type="email" name="email"
+                                value="{{ old('email', Auth::guard('clinic')->user()->email) }}" required
+                                placeholder="clinic@example.com"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            @error('email')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
+                            <input type="text" name="contact_number"
+                                value="{{ old('contact_number', Auth::guard('clinic')->user()->contact_number ?? '') }}"
+                                placeholder="09XX XXX XXXX"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            @error('contact_number')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                            <input type="text" name="address"
+                                value="{{ old('address', Auth::guard('clinic')->user()->address ?? '') }}"
+                                placeholder="Clinic address"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            @error('address')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Section -->
+                <div class="space-y-6 pt-6 border-t border-gray-200">
+                    <div class="flex items-center gap-2 pb-2 border-b-2 border-blue-600">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <h3 class="text-lg font-bold text-gray-800">Change Password</h3>
+                        <span class="text-sm text-gray-500">(Optional)</span>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-blue-800">
+                            <strong>Note:</strong> Leave password fields blank if you don't want to change your
+                            password.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+                            <input type="password" name="password" placeholder="Enter new password (min. 8 characters)"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            @error('password')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" placeholder="Confirm new password"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-xl">
+                <button type="button" onclick="closeModal('clinicSettingsModal')"
+                    class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition">
+                    Cancel
+                </button>
+                <button type="submit" form="clinicSettingsForm"
+                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">
+                    Save Changes
+                </button>
+            </div>
+
         </div>
     </div>
 

@@ -5,6 +5,30 @@
 @section('content')
 <div class="p-6 space-y-6 bg-gray-300 min-h-screen">
 
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Clinic Management</h1>
+            <p class="text-gray-600 mt-1">Manage all registered clinics</p>
+        </div>
+        <a href="{{ route('admin.clinics.pending') }}"
+            class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition flex items-center gap-2 shadow-lg relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Pending Approvals
+            @php
+            $pendingCount = \App\Models\Clinic::where('approval_status', 'pending')->count();
+            @endphp
+            @if($pendingCount > 0)
+            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                {{ $pendingCount }}
+            </span>
+            @endif
+        </a>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-lg shadow p-6">
@@ -33,6 +57,7 @@
                     <th class="px-6 py-3 text-left">Email</th>
                     <th class="px-6 py-3 text-left">Contact</th>
                     <th class="px-6 py-3 text-left">Address</th>
+                    <th class="px-6 py-3 text-left">Status</th>
                     <th class="px-6 py-3 text-left">Case Orders</th>
                     <th class="px-6 py-3 text-left">Patients</th>
                     <th class="px-6 py-3 text-left">Dentists</th>
@@ -50,6 +75,21 @@
                     <td class="px-6 py-3 text-gray-700">{{ $clinic->email }}</td>
                     <td class="px-6 py-3 text-gray-700">{{ $clinic->contact_number ?? 'N/A' }}</td>
                     <td class="px-6 py-3 text-gray-700 text-sm">{{ Str::limit($clinic->address, 30) ?? 'N/A' }}</td>
+                    <td class="px-6 py-3">
+                        @if($clinic->approval_status === 'approved')
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                            Approved
+                        </span>
+                        @elseif($clinic->approval_status === 'pending')
+                        <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-semibold">
+                            Pending
+                        </span>
+                        @else
+                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
+                            Rejected
+                        </span>
+                        @endif
+                    </td>
                     <td class="px-6 py-3">
                         <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                             {{ $clinic->case_orders_count }}
@@ -70,7 +110,7 @@
                             <!-- View Button -->
                             <a href="{{ route('admin.clinics.show', $clinic->clinic_id) }}"
                                 class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-                                aria-label="View Rider">
+                                aria-label="View Clinic">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                                     class="w-4 h-4">
                                     <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
@@ -80,12 +120,11 @@
                                 </svg>
                             </a>
                         </div>
-
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center py-6 text-gray-500">No clinics found.</td>
+                    <td colspan="10" class="text-center py-6 text-gray-500">No clinics found.</td>
                 </tr>
                 @endforelse
             </tbody>

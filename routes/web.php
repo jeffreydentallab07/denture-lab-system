@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClinicAuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Auth\DualAuthenticationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Models\User;
 
 
@@ -73,13 +74,21 @@ Route::post('/logout', [DualAuthenticationController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
+Route::get('password/reset', [ForgotPasswordController::class, 'showForgotForm'])
+    ->name('password.request')->middleware('guest');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLink'])
+    ->name('password.email')->middleware('guest');
+Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])
+    ->name('password.reset')->middleware('guest');
+Route::post('password/reset', [ForgotPasswordController::class, 'resetPassword'])
+    ->name('password.update')->middleware('guest');
 /*
 |--------------------------------------------------------------------------
 | CLINIC SIGNUP (Public)
 |--------------------------------------------------------------------------
 */
 
-Route::post('/clinic/signup', [ClinicAuthController::class, 'signup'])->name('clinic.signup.post');
+Route::post('/clinic/signup', [ClinicAuthController::class, 'signup'])->name('clinic.register');
 
 /*
 |--------------------------------------------------------------------------
@@ -137,8 +146,12 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
     Route::resource('materials', AdminMaterialsController::class);
 
     // Clinics Management
-    Route::resource('clinics', AdminClinicsController::class);
-
+    Route::get('clinics/pending', [AdminClinicsController::class, 'pending'])->name('clinics.pending');
+    Route::get('clinics', [AdminClinicsController::class, 'index'])->name('clinics.index');
+    Route::get('clinics/{clinic}', [AdminClinicsController::class, 'show'])->name('clinics.show');
+    Route::post('clinics/{clinic}/approve', [AdminClinicsController::class, 'approve'])->name('clinics.approve');
+    Route::post('clinics/{clinic}/reject', [AdminClinicsController::class, 'reject'])->name('clinics.reject');
+    Route::delete('clinics/{clinic}', [AdminClinicsController::class, 'destroy'])->name('clinics.destroy');
     // Dentists Management
     Route::resource('dentists', AdminDentistsController::class);
 
@@ -156,6 +169,8 @@ Route::middleware(['auth', 'check.admin'])->prefix('admin')->name('admin.')->gro
 
     // Billing Management
     Route::resource('billing', AdminBillingsController::class);
+    Route::get('billing/{billing}/invoice', [AdminBillingsController::class, 'invoice'])
+        ->name('billing.invoice');
 
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
@@ -285,7 +300,12 @@ Route::middleware(['auth', 'check.rider'])->prefix('rider')->name('rider.')->gro
 
 
 Route::get('/', function () {
-    if (Auth::check()) {
+    // Check clinic guard FIRST (to prioritize clinic if both somehow authenticated)
+    if (Auth::guard('clinic')->check()) {
+        return redirect()->route('clinic.dashboard');
+    }
+
+    if (Auth::guard('web')->check()) {
         /** @var User $user */
         $user = Auth::user();
 
@@ -304,9 +324,6 @@ Route::get('/', function () {
         return redirect()->route('home');
     }
 
-    if (Auth::guard('clinic')->check()) {
-        return redirect()->route('clinic.dashboard');
-    }
-
+    // No one authenticated
     return redirect()->route('login');
 });

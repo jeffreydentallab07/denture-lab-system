@@ -21,6 +21,9 @@ class DualAuthenticationController extends Controller
             'password' => 'required|string',
         ]);
 
+        // IMPORTANT: Logout any existing sessions first
+        $this->logoutAll($request);
+
         $credentials = $request->only('email_or_username', 'password');
 
         // Try to authenticate as User first
@@ -29,17 +32,24 @@ class DualAuthenticationController extends Controller
         if ($user) {
             // Login as User
             Auth::guard('web')->login($user, $request->filled('remember'));
+            $request->session()->regenerate();
 
             // Redirect based on user role
             return $this->redirectBasedOnRole($user->role);
         }
 
         // If not found in users, try to authenticate as Clinic
-        $clinic = $this->authenticateClinic($credentials);
+        $clinicResult = $this->authenticateClinic($credentials);
 
-        if ($clinic) {
+        // Check if it's an error redirect (approval status issue)
+        if ($clinicResult instanceof \Illuminate\Http\RedirectResponse) {
+            return $clinicResult;
+        }
+
+        if ($clinicResult) {
             // Login as Clinic (using clinic guard)
-            Auth::guard('clinic')->login($clinic, $request->filled('remember'));
+            Auth::guard('clinic')->login($clinicResult, $request->filled('remember'));
+            $request->session()->regenerate();
 
             // Redirect to clinic dashboard
             return redirect()->intended('/clinic/dashboard');
@@ -79,7 +89,25 @@ class DualAuthenticationController extends Controller
 
         // If clinic found and password matches
         if ($clinic && Hash::check($credentials['password'], $clinic->password)) {
-            return $clinic;
+
+            // Check approval status
+            if ($clinic->approval_status === 'pending') {
+                return back()->withErrors([
+                    'email_or_username' => 'Your account is pending admin approval. Please wait for verification.',
+                ])->onlyInput('email_or_username');
+            }
+
+            if ($clinic->approval_status === 'rejected') {
+                $reason = $clinic->rejection_reason ? ': ' . $clinic->rejection_reason : '.';
+                return back()->withErrors([
+                    'email_or_username' => 'Your account registration has been rejected' . $reason,
+                ])->onlyInput('email_or_username');
+            }
+
+            // Only return clinic if approved
+            if ($clinic->approval_status === 'approved') {
+                return $clinic;
+            }
         }
 
         return null;
@@ -105,16 +133,24 @@ class DualAuthenticationController extends Controller
     }
 
     /**
+     * Logout ALL guards
+     */
+    private function logoutAll(Request $request)
+    {
+        Auth::guard('web')->logout();
+        Auth::guard('clinic')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    }
+
+    /**
      * Logout for both guards
      */
     public function logout(Request $request)
     {
-        // Check which guard is authenticated and logout
-        if (Auth::guard('web')->check()) {
-            Auth::guard('web')->logout();
-        } elseif (Auth::guard('clinic')->check()) {
-            Auth::guard('clinic')->logout();
-        }
+        // Logout ALL guards
+        Auth::guard('web')->logout();
+        Auth::guard('clinic')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

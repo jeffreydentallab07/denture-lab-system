@@ -102,7 +102,7 @@
                             Notes / Instructions
                         </label>
                         <textarea name="notes" rows="3" placeholder="Any special instructions for the rider..."
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('notes') }}</textarea>
+                            class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('notes') }}</textarea>
                         @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

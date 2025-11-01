@@ -17,11 +17,20 @@ class Clinic extends Authenticatable
         'contact_number',
         'address',
         'profile_photo',
+        'approval_status',
+        'rejection_reason',
+        'approved_at',
+        'approved_by',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'approved_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
     // Relationships
@@ -43,5 +52,29 @@ class Clinic extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(ClinicNotification::class, 'clinic_id', 'clinic_id');
+    }
+
+    // Check if clinic is approved
+    public function isApproved()
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    // Check if clinic is pending
+    public function isPending()
+    {
+        return $this->approval_status === 'pending';
+    }
+
+    // Check if clinic is rejected
+    public function isRejected()
+    {
+        return $this->approval_status === 'rejected';
+    }
+
+    // Relationship with admin who approved
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

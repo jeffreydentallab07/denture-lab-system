@@ -47,7 +47,7 @@
                 <h2 class="text-xl font-semibold text-white">Billing Details</h2>
             </div>
 
-            <form action="{{ route('admin.billing.update', $billing->id) }}" method="POST" id="editBillingForm">
+            <form action="{{ route('admin.billing.update', $billing->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -80,86 +80,149 @@
                                     $billing->appointment->caseOrder->clinic->clinic_name ?? 'N/A' }}</p>
                             </div>
                             <div>
-                                <p class="text-gray-600">Payment Status</p>
-                                <span
-                                    class="px-2 py-1 text-xs rounded-full font-medium {{ $billing->payment_status === 'paid' ? 'bg-green-100 text-green-800' : ($billing->payment_status === 'partial' ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                    {{ ucfirst($billing->payment_status) }}
-                                </span>
+                                <p class="text-gray-600">Material Cost</p>
+                                <p class="font-semibold text-green-600">₱{{
+                                    number_format($billing->appointment->total_material_cost, 2) }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Appointment ID (Read-only) -->
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="appointment_id" value="{{ $billing->appointment_id }}">
+                    <input type="hidden" id="materialCost" value="{{ $billing->appointment->total_material_cost }}">
+
+                    <!-- Additional Details -->
                     <div class="space-y-2">
-                        <label class="block font-semibold text-gray-700 flex items-center">
+                        <label for="additional_details" class="block font-semibold text-gray-700 flex items-center">
                             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                </path>
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Appointment ID
+                            Additional Fee Details
                         </label>
-                        <div class="relative">
-                            <input type="text" value="APT-{{ str_pad($billing->appointment_id, 5, '0', STR_PAD_LEFT) }}"
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-semibold cursor-not-allowed"
-                                readonly>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                    </path>
-                                </svg>
-                            </div>
-                        </div>
+                        <textarea name="additional_details" id="additional_details" rows="2"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200"
+                            placeholder="e.g., Labor, transportation, rush fee...">{{ old('additional_details', $billing->additional_details) }}</textarea>
                         <p class="text-xs text-gray-500 flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Appointment ID cannot be changed
+                            Describe what the additional charges are for
                         </p>
                     </div>
 
-                    <!-- Hidden field to preserve appointment_id -->
-                    <input type="hidden" name="appointment_id" value="{{ $billing->appointment_id }}">
-
-                    <!-- Total Amount Field -->
+                    <!-- Additional Amount -->
                     <div class="space-y-2">
-                        <label for="total_amount" class="block font-semibold text-gray-700 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                </path>
+                        <label for="additional_amount" class="block font-semibold text-gray-700 flex items-center">
+                            <svg class="w-5 h-5 mr-2 fill-green-600" viewBox="0 0 36 36" version="1.1"
+                                preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <title>peso-solid</title>
+                                    <path d="M14.18,13.8V16h9.45a5.26,5.26,0,0,0,.08-.89,4.72,4.72,0,0,0-.2-1.31Z"
+                                        class="clr-i-solid clr-i-solid-path-1"></path>
+                                    <path d="M14.18,19.7h5.19a4.28,4.28,0,0,0,3.5-1.9H14.18Z"
+                                        class="clr-i-solid clr-i-solid-path-2"></path>
+                                    <path d="M19.37,10.51H14.18V12h8.37A4.21,4.21,0,0,0,19.37,10.51Z"
+                                        class="clr-i-solid clr-i-solid-path-3"></path>
+                                    <path
+                                        d="M17.67,2a16,16,0,1,0,16,16A16,16,0,0,0,17.67,2Zm10.5,15.8H25.7a6.87,6.87,0,0,1-6.33,4.4H14.18v6.54a1.25,1.25,0,1,1-2.5,0V17.8H8.76a.9.9,0,1,1,0-1.8h2.92V13.8H8.76a.9.9,0,1,1,0-1.8h2.92V9.26A1.25,1.25,0,0,1,12.93,8h6.44a6.84,6.84,0,0,1,6.15,4h2.65a.9.9,0,0,1,0,1.8H26.09a6.91,6.91,0,0,1,.12,1.3,6.8,6.8,0,0,1-.06.9h2a.9.9,0,0,1,0,1.8Z"
+                                        class="clr-i-solid clr-i-solid-path-4"></path>
+                                    <rect x="0" y="0" width="36" height="36" fill-opacity="0"></rect>
+                                </g>
                             </svg>
-                            Total Amount
+                            Additional Amount
                             <span class="text-red-500 ml-1">*</span>
                         </label>
                         <div class="relative">
                             <span
                                 class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-600 font-semibold text-lg">₱</span>
-                            <input type="number" step="0.01" id="total_amount" name="total_amount"
-                                value="{{ old('total_amount', $billing->total_amount) }}"
+                            <input type="number" step="0.01" id="additional_amount" name="additional_amount"
+                                value="{{ old('additional_amount', $billing->additional_amount) }}"
                                 class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition duration-200 text-lg font-semibold"
-                                required>
+                                required oninput="calculateTotal()">
                         </div>
-                        <p class="hidden text-red-600 text-sm mt-1 flex items-center" id="amountError">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                    clip-rule="evenodd"></path>
-                            </svg>
-                            Total Amount must be greater than 0.
-                        </p>
                         <p class="text-xs text-gray-500 flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Previous amount: ₱{{ number_format($billing->total_amount, 2) }}
+                            Previous: ₱{{ number_format($billing->additional_amount, 2) }}
                         </p>
+                    </div>
+
+                    <!-- Total Amount Display -->
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Material Cost:</span>
+                            <span class="font-semibold text-gray-800">₱{{
+                                number_format($billing->appointment->total_material_cost, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Additional Amount:</span>
+                            <span class="font-semibold text-gray-800" id="displayAdditionalAmount">₱{{
+                                number_format($billing->additional_amount, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t-2 border-blue-300">
+                            <span class="text-lg font-bold text-gray-800">Total Amount:</span>
+                            <span class="text-xl font-bold text-blue-600" id="displayTotalAmount">₱{{
+                                number_format($billing->total_amount, 2) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Status -->
+                    <div class="space-y-2">
+                        <label for="payment_status" class="block font-semibold text-gray-700">
+                            Payment Status <span class="text-red-500">*</span>
+                        </label>
+                        <select name="payment_status" id="payment_status" required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200">
+                            <option value="unpaid" {{ old('payment_status', $billing->payment_status) == 'unpaid' ?
+                                'selected' : '' }}>Unpaid</option>
+                            <option value="partial" {{ old('payment_status', $billing->payment_status) == 'partial' ?
+                                'selected' : '' }}>Partial Payment</option>
+                            <option value="paid" {{ old('payment_status', $billing->payment_status) == 'paid' ?
+                                'selected' : '' }}>Paid</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="space-y-2">
+                        <label for="payment_method" class="block font-semibold text-gray-700">
+                            Payment Method
+                        </label>
+                        <select name="payment_method" id="payment_method"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200">
+                            <option value="">-- Select Method --</option>
+                            <option value="Cash" {{ old('payment_method', $billing->payment_method) == 'Cash' ?
+                                'selected' : '' }}>Cash</option>
+                            <option value="Bank Transfer" {{ old('payment_method', $billing->payment_method) == 'Bank
+                                Transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                            <option value="Credit Card" {{ old('payment_method', $billing->payment_method) == 'Credit
+                                Card' ? 'selected' : '' }}>Credit Card</option>
+                            <option value="Debit Card" {{ old('payment_method', $billing->payment_method) == 'Debit
+                                Card' ? 'selected' : '' }}>Debit Card</option>
+                            <option value="GCash" {{ old('payment_method', $billing->payment_method) == 'GCash' ?
+                                'selected' : '' }}>GCash</option>
+                            <option value="PayMaya" {{ old('payment_method', $billing->payment_method) == 'PayMaya' ?
+                                'selected' : '' }}>PayMaya</option>
+                            <option value="Check" {{ old('payment_method', $billing->payment_method) == 'Check' ?
+                                'selected' : '' }}>Check</option>
+                        </select>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="space-y-2">
+                        <label for="notes" class="block font-semibold text-gray-700">
+                            Notes
+                        </label>
+                        <textarea name="notes" id="notes" rows="4"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200"
+                            placeholder="Additional notes or payment terms...">{{ old('notes', $billing->notes) }}</textarea>
                     </div>
 
                     <!-- Action Buttons -->
@@ -185,78 +248,22 @@
                 </div>
             </form>
         </div>
-
-
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const amountField = document.getElementById("total_amount");
-        const amountError = document.getElementById("amountError");
+    function calculateTotal() {
+    const materialCost = parseFloat(document.getElementById('materialCost').value) || 0;
+    const additionalAmount = parseFloat(document.getElementById('additional_amount').value) || 0;
+    const totalAmount = materialCost + additionalAmount;
+    
+    document.getElementById('displayAdditionalAmount').textContent = '₱' + additionalAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+    document.getElementById('displayTotalAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+}
 
-        function validateAmount() {
-            const value = parseFloat(amountField.value);
-            if (isNaN(value) || value <= 0) {
-                amountField.classList.add("border-red-500", "ring-2", "ring-red-200", "animate-shake");
-                amountField.classList.remove("border-gray-300", "border-green-500");
-                amountError.classList.remove("hidden");
-            } else {
-                amountField.classList.remove("border-red-500", "ring-red-200", "animate-shake");
-                amountField.classList.add("border-green-500", "ring-2", "ring-green-200");
-                amountError.classList.add("hidden");
-            }
-        }
-
-        // Real-time validation
-        amountField.addEventListener("input", validateAmount);
-
-        // Format amount on blur
-        amountField.addEventListener("blur", function() {
-            if (this.value && !isNaN(parseFloat(this.value))) {
-                this.value = parseFloat(this.value).toFixed(2);
-            }
-        });
-    });
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
 </script>
-
-<style>
-    @keyframes shake {
-
-        0%,
-        100% {
-            transform: translateX(0);
-        }
-
-        10%,
-        30%,
-        50%,
-        70%,
-        90% {
-            transform: translateX(-6px);
-        }
-
-        20%,
-        40%,
-        60%,
-        80% {
-            transform: translateX(6px);
-        }
-    }
-
-    .animate-shake {
-        animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
-    }
-
-    /* Smooth transitions */
-    input {
-        transition: all 0.2s ease-in-out;
-    }
-
-    /* Number input styling */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        opacity: 1;
-    }
-</style>
 @endsection

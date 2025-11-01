@@ -220,9 +220,10 @@ class CaseOrdersController extends Controller
             $delivery->delivery_id
         );
 
+        // Redirect to billing creation with appointment parameter
         return redirect()
-            ->route('admin.case-orders.show', $id)
-            ->with('success', 'Delivery has been created and rider assigned successfully!');
+            ->route('admin.billing.create', ['appointment' => $caseOrder->latestAppointment->appointment_id])
+            ->with('success', 'Delivery created successfully! Now create the billing for this appointment.');
     }
 
     public function destroy($id)

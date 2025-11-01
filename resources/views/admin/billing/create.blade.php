@@ -109,21 +109,50 @@
                     @endif
                 </div>
 
-                <!-- Total Amount -->
+                <!-- Additional Details -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Total Amount <span class="text-red-500">*</span>
+                        Additional Fee Details (Optional)
+                    </label>
+                    <textarea name="additional_details" rows="2"
+                        class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:outline-none"
+                        placeholder="e.g., Labor, transportation, rush fee, consultation...">{{ old('additional_details') }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Describe what the additional charges are for
+                    </p>
+                </div>
+
+                <!-- Additional Amount -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Amount <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <span class="absolute left-3 top-3 text-gray-500">₱</span>
-                        <input type="number" name="total_amount" id="totalAmount" step="0.01" min="0" required
-                            value="{{ $appointment ? $appointment->total_material_cost : '' }}"
+                        <input type="number" name="additional_amount" id="additionalAmount" step="0.01" min="0" required
+                            value="{{ old('additional_amount', 0) }}"
                             class="w-full border-2 border-gray-300 rounded-lg p-3 pl-8 focus:border-blue-500 focus:outline-none"
-                            placeholder="0.00">
+                            placeholder="0.00" oninput="calculateTotal()">
                     </div>
                     <p class="text-xs text-gray-500 mt-1">
-                        Suggested: Material Cost + Labor + Other Charges
+                        Labor, services, and other additional charges
                     </p>
+                </div>
+
+                <!-- Total Amount (Auto-calculated) -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Material Cost:</span>
+                        <span class="font-semibold text-gray-800" id="displayMaterialCost">₱0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Additional Amount:</span>
+                        <span class="font-semibold text-gray-800" id="displayAdditionalAmount">₱0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t-2 border-blue-300">
+                        <span class="text-lg font-bold text-gray-800">Total Amount:</span>
+                        <span class="text-xl font-bold text-blue-600" id="displayTotalAmount">₱0.00</span>
+                    </div>
                 </div>
 
                 <!-- Payment Status -->
@@ -164,27 +193,8 @@
                     </label>
                     <textarea name="notes" rows="4"
                         class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:outline-none"
-                        placeholder="Additional notes or payment terms..."></textarea>
+                        placeholder="Additional notes or payment terms...">{{ old('notes') }}</textarea>
                 </div>
-
-                <!-- Info Box -->
-                {{-- <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
-                    <div class="flex items-start">
-                        <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <div>
-                            <h4 class="text-sm font-semibold text-blue-800 mb-1">What happens after creation?</h4>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• The clinic will receive a notification about the billing</li>
-                                <li>• Billing details will be visible to the clinic</li>
-                                <li>• You can update payment status when payment is received</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div> --}}
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-3 pt-4 border-t">
@@ -208,19 +218,36 @@
     const option = select.options[select.selectedIndex];
     
     if (select.value) {
+        const materialCost = parseFloat(option.dataset.cost);
+        
         document.getElementById('previewClinic').textContent = option.dataset.clinic;
         document.getElementById('previewPatient').textContent = option.dataset.patient;
         document.getElementById('previewCase').textContent = option.dataset.case;
-        document.getElementById('previewCost').textContent = '₱' + parseFloat(option.dataset.cost).toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('previewCost').textContent = '₱' + materialCost.toLocaleString('en-US', {minimumFractionDigits: 2});
         document.getElementById('appointmentPreview').classList.remove('hidden');
-        document.getElementById('materialCost').value = option.dataset.cost;
+        document.getElementById('materialCost').value = materialCost;
         
-        // Suggest total amount based on material cost
-        document.getElementById('totalAmount').value = parseFloat(option.dataset.cost).toFixed(2);
+        calculateTotal();
     } else {
         document.getElementById('appointmentPreview').classList.add('hidden');
-        document.getElementById('totalAmount').value = '';
+        document.getElementById('materialCost').value = 0;
+        calculateTotal();
     }
 }
+
+function calculateTotal() {
+    const materialCost = parseFloat(document.getElementById('materialCost').value) || 0;
+    const additionalAmount = parseFloat(document.getElementById('additionalAmount').value) || 0;
+    const totalAmount = materialCost + additionalAmount;
+    
+    document.getElementById('displayMaterialCost').textContent = '₱' + materialCost.toLocaleString('en-US', {minimumFractionDigits: 2});
+    document.getElementById('displayAdditionalAmount').textContent = '₱' + additionalAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+    document.getElementById('displayTotalAmount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
 </script>
 @endsection

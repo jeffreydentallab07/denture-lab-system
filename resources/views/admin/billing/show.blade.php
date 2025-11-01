@@ -154,38 +154,33 @@
                     <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Materials Used</h2>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full">
+                        <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Material
-                                    </th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity
-                                    </th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit
-                                        Price</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total
-                                    </th>
+                                    <th class="text-left p-3 text-sm font-semibold text-gray-700">Material</th>
+                                    <th class="text-center p-3 text-sm font-semibold text-gray-700">Qty</th>
+                                    <th class="text-right p-3 text-sm font-semibold text-gray-700">Unit Price</th>
+                                    <th class="text-right p-3 text-sm font-semibold text-gray-700">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y">
                                 @foreach($billing->appointment->materialUsages as $usage)
-                                <tr>
-                                    <td class="px-4 py-3 text-sm font-medium text-gray-800">{{
-                                        $usage->material->material_name }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ $usage->quantity_used }} {{
-                                        $usage->material->unit }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">₱{{
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 text-sm text-gray-800">{{ $usage->material->material_name }}</td>
+                                    <td class="p-3 text-sm text-center text-gray-800">{{ $usage->quantity_used }}</td>
+                                    <td class="p-3 text-sm text-right text-gray-800">₱{{
                                         number_format($usage->material->price, 2) }}</td>
-                                    <td class="px-4 py-3 text-sm font-semibold text-green-600">₱{{
-                                        number_format($usage->total_cost, 2) }}</td>
+                                    <td class="p-3 text-sm text-right font-medium text-gray-800">₱{{
+                                        number_format($usage->quantity_used * $usage->material->price, 2) }}
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
-                            <tfoot class="bg-gray-50">
+                            <tfoot class="bg-gray-50 border-t-2">
                                 <tr>
-                                    <td colspan="3" class="px-4 py-3 text-sm font-bold text-gray-800 text-right">Total
+                                    <td colspan="3" class="p-3 text-sm font-bold text-gray-800 text-right">Total
                                         Material Cost:</td>
-                                    <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{
+                                    <td class="p-3 text-sm font-bold text-green-600 text-right">₱{{
                                         number_format($billing->appointment->total_material_cost, 2) }}</td>
                                 </tr>
                             </tfoot>
@@ -204,6 +199,12 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Actions</h3>
 
                     <div class="space-y-3">
+                        <!-- Print Invoice -->
+                        <a href="{{ route('admin.billing.invoice', $billing->id) }}" target="_blank"
+                            class="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+                            Print Invoice
+                        </a>
+
                         <!-- Edit Billing -->
                         <a href="{{ route('admin.billing.edit', $billing->id) }}"
                             class="block w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition">

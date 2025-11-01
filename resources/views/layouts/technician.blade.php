@@ -8,18 +8,33 @@
     <link rel="icon" href="{{ asset('images/logo3.ico') }}" type="image/x-icon">
     <title>@yield('title', 'Technician Dashboard')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
 </head>
 
-<body class="h-screen flex bg-gray-50">
+<body class="bg-gray-50">
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-blue-900 text-white flex flex-col fixed top-0 left-0 h-full">
-        <div class="h-20 px-4 border-b border-blue-700 flex items-center justify-center">
-            <img src="{{ asset('images/logo2.png') }}" alt="Logo" class="h-12 object-contain">
+    <aside id="sidebar"
+        class="fixed top-0 left-0 w-64 h-full bg-blue-900 text-white flex flex-col z-40 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="h-16 md:h-20 px-4 border-b border-blue-700 flex items-center justify-between">
+            <img src="{{ asset('images/logo2.png') }}" alt="Logo" class="h-10 md:h-12 object-contain">
+            <!-- Close button (mobile only) -->
+            <button id="close-sidebar-btn" class="md:hidden text-white p-2 hover:bg-blue-800 rounded">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
 
         <!-- Navigation -->
-        <nav class="mt-4 flex-grow space-y-1 px-3">
+        <nav class="mt-4 flex-grow space-y-1 px-3 overflow-y-auto">
             <a href="{{ route('technician.dashboard') }}"
                 class="flex items-center space-x-3 p-3 rounded-lg transition
                       {{ request()->routeIs('technician.dashboard') ? 'bg-white text-blue-900 font-semibold' : 'text-white hover:bg-blue-800' }}">
@@ -103,19 +118,26 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="flex-grow flex flex-col h-full ml-64">
+    <!-- Main Content Wrapper -->
+    <div class="min-h-screen md:ml-64">
         <!-- Header -->
-        <header class="bg-white p-4 flex items-center justify-between shadow-sm z-10">
-            <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold text-gray-800">Technician Portal</h1>
+        <header class="bg-white p-3 md:p-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- Hamburger Menu (Mobile Only) -->
+                <button id="hamburger-btn" class="md:hidden text-gray-700 p-2 hover:bg-gray-100 rounded">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 class="text-lg md:text-xl font-bold text-gray-800">Technician Portal</h1>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 md:gap-4">
                 <!-- Notifications -->
                 <div id="notification-container" class="relative">
                     <button id="notification-bell-btn"
-                        class="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition relative">
+                        class="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg hover:bg-gray-100 transition relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path
@@ -131,16 +153,16 @@
 
                     <!-- Notification Dropdown -->
                     <div id="notification-popup"
-                        class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-300 hidden z-50 origin-top-right transition-all">
+                        class="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-300 hidden z-50 origin-top-right transition-all">
                         <div
-                            class="p-4 border-b border-gray-300 flex justify-between items-center bg-gray-50 rounded-t-xl">
-                            <h5 class="text-base font-semibold text-gray-700">Notifications</h5>
+                            class="p-3 md:p-4 border-b border-gray-300 flex justify-between items-center bg-gray-50 rounded-t-xl">
+                            <h5 class="text-sm md:text-base font-semibold text-gray-700">Notifications</h5>
                             @if(isset($notificationCount) && $notificationCount > 0)
                             <span class="text-xs text-red-500 font-medium">{{ $notificationCount }} New</span>
                             @endif
                         </div>
 
-                        <div class="max-h-80 overflow-y-auto divide-y divide-gray-200">
+                        <div class="max-h-80 md:max-h-96 overflow-y-auto divide-y divide-gray-200">
                             @if(isset($notifications) && $notifications->count() > 0)
                             @foreach($notifications as $notification)
                             <a href="{{ $notification->link ?? '#' }}"
@@ -181,83 +203,120 @@
                     </div>
                 </div>
 
-                <!-- Current Date/Time -->
-                <div class="text-sm text-gray-600">
+                <!-- Current Date/Time (Hidden on mobile) -->
+                <div class="hidden md:block text-sm text-gray-600">
                     {{ now()->format('l, M d, Y') }}
                 </div>
             </div>
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-grow overflow-y-auto">
+        <main>
             @yield('content')
         </main>
     </div>
+
     <script>
+        // Mobile Sidebar Toggle
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            mobileOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', openSidebar);
+        }
+
+        if (closeSidebarBtn) {
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeSidebar);
+        }
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
+                closeSidebar();
+            }
+        });
+
+        // Notification popup
         document.addEventListener('DOMContentLoaded', function() {
-        // Notification popup toggle
-        const bellButton = document.getElementById('notification-bell-btn');
-        const popup = document.getElementById('notification-popup');
-        const container = document.getElementById('notification-container');
+            const bellButton = document.getElementById('notification-bell-btn');
+            const popup = document.getElementById('notification-popup');
+            const container = document.getElementById('notification-container');
 
-        if (bellButton && popup) {
-            function closePopup() {
-                popup.classList.add('hidden');
-            }
-
-            function openPopup() {
-                popup.classList.remove('hidden');
-            }
-
-            bellButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (popup.classList.contains('hidden')) {
-                    openPopup();
-                } else {
-                    closePopup();
+            if (bellButton && popup) {
+                function closePopup() {
+                    popup.classList.add('hidden');
                 }
-            });
 
-            // Close when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!popup.classList.contains('hidden') && !container.contains(e.target)) {
-                    closePopup();
+                function openPopup() {
+                    popup.classList.remove('hidden');
                 }
-            });
 
-            // Close on escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
-                    closePopup();
+                bellButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (popup.classList.contains('hidden')) {
+                        openPopup();
+                    } else {
+                        closePopup();
+                    }
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!popup.classList.contains('hidden') && !container.contains(e.target)) {
+                        closePopup();
+                    }
+                });
+
+                // Close on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                        closePopup();
+                    }
+                });
+            }
+        });
+
+        // Mark notification as read
+        function markAsRead(event, notificationId) {
+            fetch(`/technician/notifications/${notificationId}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            }).then(response => {
+                if (response.ok) {
+                    const countElement = document.querySelector('#notification-bell-btn span');
+                    if (countElement) {
+                        let count = parseInt(countElement.textContent);
+                        count = Math.max(0, count - 1);
+                        if (count === 0) {
+                            countElement.remove();
+                        } else {
+                            countElement.textContent = count;
+                        }
+                    }
                 }
             });
         }
-    });
-
-// Mark notification as read
-function markAsRead(event, notificationId) {
-    fetch(`/technician/notifications/${notificationId}/mark-read`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    }).then(response => {
-        if (response.ok) {
-            // Update notification count
-            const countElement = document.querySelector('#notification-bell-btn span');
-            if (countElement) {
-                let count = parseInt(countElement.textContent);
-                count = Math.max(0, count - 1);
-                if (count === 0) {
-                    countElement.remove();
-                } else {
-                    countElement.textContent = count;
-                }
-            }
-        }
-    });
-}
     </script>
 </body>
 

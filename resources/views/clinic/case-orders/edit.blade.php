@@ -26,15 +26,15 @@
 
                     <!-- Patient Selection -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Patient <span class="text-red-500">*</span>
                         </label>
-                        <select name="patient_id" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <select id="patientSelect" name="patient_id" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">Select Patient</option>
                             @foreach($patients as $patient)
-                            <option value="{{ $patient->patient_id }}" {{ old('patient_id', $caseOrder->patient_id) ==
-                                $patient->patient_id ? 'selected' : '' }}>
+                            <option value="{{ $patient->patient_id }}" data-dentist-id="{{ $patient->dentist_id }}" {{
+                                old('patient_id', $caseOrder->patient_id) == $patient->patient_id ? 'selected' : '' }}>
                                 {{ $patient->name }} - {{ $patient->email }}
                             </option>
                             @endforeach
@@ -44,33 +44,41 @@
                         @enderror
                     </div>
 
-                    <!-- Dentist Selection -->
+                    <!-- Dentist Selection (Auto-filled and Disabled) -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Dentist <span class="text-red-500">*</span>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Assigned Dentist <span class="text-red-500">*</span>
                         </label>
-                        <select name="dentist_id" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Select Dentist</option>
+                        <select id="dentistSelect" name="dentist_id" required disabled
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 text-gray-700">
+                            <option value="">Select a patient first</option>
                             @foreach($dentists as $dentist)
                             <option value="{{ $dentist->dentist_id }}" {{ old('dentist_id', $caseOrder->dentist_id) ==
                                 $dentist->dentist_id ? 'selected' : '' }}>
-                                {{ $dentist->name }} - {{ $dentist->email }}
+                                Dr. {{ $dentist->name }}
                             </option>
                             @endforeach
                         </select>
                         @error('dentist_id')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        <p class="text-gray-500 text-xs mt-1">
+                            <svg class="w-3 h-3 inline text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Dentist is automatically assigned based on patient selection
+                        </p>
                     </div>
 
                     <!-- Case Type -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Case Type <span class="text-red-500">*</span>
                         </label>
                         <select name="case_type" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">Select Case Type</option>
                             <option value="denture" {{ old('case_type', $caseOrder->case_type) == 'denture' ? 'selected'
                                 : '' }}>Denture</option>
@@ -90,12 +98,12 @@
 
                     <!-- Notes -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Notes / Special Instructions
                         </label>
                         <textarea name="notes" rows="5"
                             placeholder="Enter any special instructions or notes for this case..."
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('notes', $caseOrder->notes) }}</textarea>
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">{{ old('notes', $caseOrder->notes) }}</textarea>
                         @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -104,7 +112,7 @@
 
                     <!-- Warning Box -->
                     @if($caseOrder->status === 'adjustment requested')
-                    <div class="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4">
+                    <div class="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
@@ -141,4 +149,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const patientSelect = document.getElementById('patientSelect');
+    const dentistSelect = document.getElementById('dentistSelect');
+
+    // Auto-select dentist when patient is selected
+    patientSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const dentistId = selectedOption.getAttribute('data-dentist-id');
+
+        if (dentistId) {
+            // Set the dentist value
+            dentistSelect.value = dentistId;
+            // Enable the field (but keep it readonly via form submission)
+            dentistSelect.disabled = false;
+            dentistSelect.classList.remove('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
+            dentistSelect.classList.add('bg-gray-50', 'text-gray-700');
+        } else {
+            // Reset if no patient selected
+            dentistSelect.value = '';
+            dentistSelect.disabled = true;
+            dentistSelect.classList.add('bg-gray-100', 'text-gray-600', 'cursor-not-allowed');
+            dentistSelect.classList.remove('bg-gray-50', 'text-gray-700');
+        }
+    });
+
+    // Prevent manual changes to dentist field
+    dentistSelect.addEventListener('mousedown', function(e) {
+        if (!this.disabled) {
+            e.preventDefault();
+            alert('The dentist is automatically assigned based on the patient. Please select a different patient if you need a different dentist.');
+        }
+    });
+
+    // Trigger change event on page load (for existing case order)
+    if (patientSelect.value) {
+        patientSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 @endsection

@@ -20,6 +20,8 @@ class Billing extends Model
         'total_amount',
         'payment_status',
         'payment_method',
+        'additional_details',
+        'additional_amount',
         'notes',
     ];
 
@@ -30,6 +32,7 @@ class Billing extends Model
         'discount' => 'decimal:2',
         'tax' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'additional_amount' => 'decimal:2',
     ];
 
     // Relationships
