@@ -80,17 +80,16 @@
                         <select name="case_type" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">Select Case Type</option>
-                            <option value="denture" {{ old('case_type', $caseOrder->case_type) == 'denture' ? 'selected'
-                                : '' }}>Denture</option>
-                            <option value="crown" {{ old('case_type', $caseOrder->case_type) == 'crown' ? 'selected' :
-                                '' }}>Crown</option>
-                            <option value="bridge" {{ old('case_type', $caseOrder->case_type) == 'bridge' ? 'selected' :
-                                '' }}>Bridge</option>
-                            <option value="implant" {{ old('case_type', $caseOrder->case_type) == 'implant' ? 'selected'
-                                : '' }}>Implant</option>
-                            <option value="orthodontics" {{ old('case_type', $caseOrder->case_type) == 'orthodontics' ?
-                                'selected' : '' }}>Orthodontics</option>
+                            <option value="retainers" {{ old('case_type', $caseOrder->case_type) == 'retainers' ?
+                                'selected' : '' }}>Retainers</option>
+                            <option value="full_denture" {{ old('case_type', $caseOrder->case_type) == 'full_denture' ?
+                                'selected' : '' }}>Full Denture</option>
+                            <option value="jacket_crown" {{ old('case_type', $caseOrder->case_type) == 'jacket_crown' ?
+                                'selected' : '' }}>Jacket Crown</option>
+                            <option value="denture_plastic" {{ old('case_type', $caseOrder->case_type) ==
+                                'denture_plastic' ? 'selected' : '' }}>Denture Plastic</option>
                         </select>
+
                         @error('case_type')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
