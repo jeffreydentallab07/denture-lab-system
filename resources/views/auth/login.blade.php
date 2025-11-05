@@ -20,6 +20,9 @@
       <nav class="hidden md:flex space-x-6 items-center">
         <a href="#home" class="text-gray-700 hover:text-[#189ab4] font-medium transition">Home</a>
         <a href="#services" class="text-gray-700 hover:text-[#189ab4] font-medium transition">Services</a>
+        <a href="#contact" class="text-gray-700 hover:text-[#189ab4] font-medium transition">
+          Contact Us
+        </a>
         <a href="#login"
           class="bg-[#189ab4] text-white px-6 py-2 rounded-lg hover:bg-[#127a95] transition font-medium">Login</a>
       </nav>
@@ -498,6 +501,103 @@
     </div>
   </section>
 
+
+  <!-- Contact Section (paste near end of page, before </body>) -->
+  <section id="contact" class="py-20 flex flex-col justify-center items-center bg-slate-50 px-6 relative">
+    <h2 class="text-3xl font-bold text-sky-900 mb-6">Contact Us</h2>
+
+    <div class="flex justify-center w-full">
+      <div class="grid md:grid-cols-3 gap-8 w-full max-w-5xl">
+        <!-- PHONE CARD -->
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center transition-transform duration-300 hover:-translate-y-2">
+          <h3 class="text-xl font-semibold text-sky-800 mb-4">Phone Number</h3>
+          <div class="flex justify-center items-center">
+            <div class="flex flex-col items-center space-y-3">
+              <a href="tel:+639067732353"
+                class="flex items-center justify-center bg-gray-100 rounded-xl shadow-sm w-44 h-12 px-3 hover:scale-105 transition">
+                <img src="{{ asset('images/tml.png') }}" alt="TM" class="w-5 h-5 mr-3">
+                <span class="text-gray-700 font-medium">0906 773 2353</span>
+              </a>
+
+              <a href="tel:0987654321"
+                class="flex items-center justify-center bg-gray-100 rounded-xl shadow-sm w-44 h-12 px-3 hover:scale-105 transition">
+                <img src="{{ asset('images/smart.png') }}" alt="Smart" class="w-5 h-5 mr-3">
+                <span class="text-gray-700 font-medium">09 8765 4321</span>
+              </a>
+
+              <a href="tel:0911223344"
+                class="flex items-center justify-center bg-gray-100 rounded-xl shadow-sm w-44 h-12 px-3 hover:scale-105 transition">
+                <img src="{{ asset('images/dito.png') }}" alt="DITO" class="w-5 h-5 mr-3">
+                <span class="text-gray-700 font-medium">09 1122 3344</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADDRESS CARD -->
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center transition-transform duration-300 hover:-translate-y-2">
+          <h3 class="text-xl font-semibold text-sky-800 mb-4">Address</h3>
+          <button onclick="openModal()"
+            class="flex flex-col items-center justify-center w-64 p-4 rounded-xl shadow-md bg-white text-black transition-all duration-300 hover:scale-105">
+            <span class="font-medium text-sm text-center">
+              Zone 7 Bulua District 1<br>
+              9000 Cagayan de Oro City<br>
+              Misamis Oriental, Philippines
+            </span>
+          </button>
+        </div>
+
+        <!-- SOCIAL / EMAIL CARD -->
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center transition-transform duration-300 hover:-translate-y-2">
+          <h3 class="text-xl font-semibold text-sky-800 mb-6">Social Media</h3>
+          <div class="flex justify-center space-x-4">
+            <a href="https://www.facebook.com/jeffrey.dental.lab.2025" target="_blank" rel="noopener"
+              class="flex items-center justify-center bg-white rounded-xl shadow-sm w-12 h-12 hover:scale-105 transition">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+                alt="Facebook" class="w-5 h-5">
+            </a>
+            <a href="#"
+              class="flex items-center justify-center bg-white rounded-xl shadow-sm w-12 h-12 hover:scale-105 transition">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"
+                class="w-5 h-5">
+            </a>
+            <a href="mailto:jeffreydentallab143@gmail.com"
+              class="flex items-center justify-center bg-white rounded-xl shadow-sm w-12 h-12 hover:scale-105 transition">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg" alt="Email"
+                class="w-5 h-5">
+            </a>
+            <a href="#"
+              class="flex items-center justify-center bg-white rounded-xl shadow-sm w-12 h-12 hover:scale-105 transition">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn"
+                class="w-5 h-5">
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP MODAL (hidden by default) -->
+  <div id="mapModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-2xl p-6 rounded-2xl shadow-2xl relative">
+      <button onclick="closeModal()" aria-label="Close map"
+        class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+      <h2 class="text-lg font-semibold text-sky-700 mb-4 text-center">Google Maps Location</h2>
+      <iframe
+        src="https://www.google.com/maps?q=Zone+7+Bulua+District+1+Cagayan+de+Oro+City+Misamis+Oriental+Philippines&output=embed"
+        width="100%" height="360" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+      <div class="mt-4 text-center">
+        <a href="https://www.google.com/maps/search/?api=1&query=Zone+7+Bulua+District+1+Cagayan+de+Oro+City+Misamis+Oriental+Philippines"
+          target="_blank" rel="noopener" class="px-4 py-2 bg-sky-700 text-white rounded-lg hover:opacity-90">Open in
+          Google Maps</a>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Footer -->
   <footer class="bg-gray-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-6 text-center">
@@ -535,6 +635,45 @@
         }
       });
     });
+
+
+    function openModal() {
+    const modal = document.getElementById('mapModal');
+    if (modal) modal.classList.remove('hidden', 'opacity-0'), modal.classList.add('flex');
+    // prevent background scroll
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('mapModal');
+    if (modal) modal.classList.add('hidden'), modal.classList.remove('flex');
+    document.documentElement.style.overflow = '';
+  }
+
+  // Close modal when clicking outside the content
+  document.addEventListener('click', function (e) {
+    const modal = document.getElementById('mapModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    const content = modal.querySelector('.rounded-2xl');
+    if (content && !content.contains(e.target) && !e.target.closest('button[onclick="openModal()"]')) {
+      closeModal();
+    }
+  });
+
+  // Smooth scrolling for in-page nav links like #contact
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href === '#' || href === '#!') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // update URL without jumping
+        history.replaceState(null, '', href);
+      }
+    });
+  });
   </script>
 
 </body>
