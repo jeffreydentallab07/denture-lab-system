@@ -63,12 +63,11 @@ class CaseOrdersController extends Controller
     public function store(Request $request)
     {
         $clinic = Auth::guard('clinic')->user();
-
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,patient_id',
             'dentist_id' => 'required|exists:dentists,dentist_id',
-            'case_type' => 'required|in:denture,crown,bridge,implant,orthodontics',
-            'notes' => 'nullable|string|max:1000'
+            'case_type' => 'required|in:retainers,full_denture,jacket_crown,denture_plastic',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $validated['clinic_id'] = $clinic->clinic_id;
@@ -156,8 +155,8 @@ class CaseOrdersController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,patient_id',
             'dentist_id' => 'required|exists:dentists,dentist_id',
-            'case_type' => 'required|in:denture,crown,bridge,implant,orthodontics',
-            'notes' => 'nullable|string|max:1000'
+            'case_type' => 'required|in:retainers,full_denture,jacket_crown,denture_plastic',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $caseOrder->update($validated);
