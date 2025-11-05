@@ -155,7 +155,7 @@
     <div class="relative z-10 max-w-6xl mx-auto px-6 py-12 md:py-24 slide-in">
       <div class="bg-white rounded-2xl shadow-xl md:flex md:items-center md:justify-between overflow-hidden">
         <div class="p-8 md:w-1/2 space-y-6">
-          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Your Smile, Our Masterpiece</h1>
+          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Imong Ngisi, Our Masterpiece</h1>
           <p class="text-gray-700 text-lg md:text-xl">Your trusted partner in creating perfect smiles</p>
         </div>
 
@@ -212,7 +212,6 @@
           <div class="w-full md:w-1/2 p-4 flex flex-col justify-center bg-white">
             <h2 class="text-lg font-bold text-[#189ab4] mb-3 text-center">Clinic Registration</h2>
 
-            <!-- Display Laravel Validation Errors -->
             @if ($errors->any())
             <div class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
               <ul class="text-red-600 text-sm space-y-1">
