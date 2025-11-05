@@ -10,7 +10,10 @@ use App\Models\MaterialUsage;
 use App\Models\CaseOrder;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
+use App\Mail\AppointmentCompletedMail;
 
 class TechnicianController extends Controller
 {
@@ -68,7 +71,7 @@ class TechnicianController extends Controller
 
     public function updateAppointment(Request $request, $id)
     {
-        $appointment = Appointment::with('caseOrder')->where('technician_id', Auth::id())->findOrFail($id);
+        $appointment = Appointment::with('caseOrder.clinic')->where('technician_id', Auth::id())->findOrFail($id);
 
         $validated = $request->validate([
             'work_status' => 'nullable|in:scheduled,in progress,completed',
@@ -94,8 +97,17 @@ class TechnicianController extends Controller
                 );
             }
 
-            // If completed, keep case order as "in progress" (DO NOT mark as completed yet)
+            // ✅ If completed, send email and notifications
             if ($validated['work_status'] === 'completed' && $oldStatus !== 'completed') {
+
+                // ✅ Send email to clinic
+                try {
+                    Mail::to($appointment->caseOrder->clinic->email)->send(
+                        new AppointmentCompletedMail($appointment)
+                    );
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment completion email: ' . $e->getMessage());
+                }
 
                 // Notify admin about completion (so they can create delivery)
                 NotificationHelper::notifyAdmins(

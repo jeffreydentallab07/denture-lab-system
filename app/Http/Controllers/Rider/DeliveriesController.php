@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\CaseOrder;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Helpers\NotificationHelper;
 
@@ -95,18 +96,14 @@ class DeliveriesController extends Controller
         if ($validated['delivery_status'] === 'delivered' && $oldStatus !== 'delivered') {
             $validated['delivered_at'] = now();
 
-            // ✅ Update case order status to "under review" when delivered
+            // Update case order status to "under review" when delivered
             $caseOrder = $delivery->appointment->caseOrder;
-
-            // Check submission count
             $submissionCount = $caseOrder->submission_count;
 
             if ($submissionCount == 1) {
-                // First submission
                 $caseOrder->update(['status' => CaseOrder::STATUS_UNDER_REVIEW]);
                 $statusMessage = 'Initial submission delivered. Please review and approve or request adjustments.';
             } else {
-                // Revision submission
                 $caseOrder->update(['status' => CaseOrder::STATUS_UNDER_REVIEW]);
                 $statusMessage = "Revision #{$submissionCount} delivered. Please review and approve or request further adjustments.";
             }
@@ -114,21 +111,40 @@ class DeliveriesController extends Controller
 
         $delivery->update($validated);
 
-        // Notify clinic when status changes
+        // Send notifications and emails when status changes
         if ($oldStatus !== $validated['delivery_status']) {
-            $notifMessage = '';
-            switch ($validated['delivery_status']) {
-                case 'in transit':
-                    $notifMessage = 'Your order is now in transit and will arrive soon.';
-                    break;
-                case 'delivered':
-                    $notifMessage = $statusMessage ?? 'Your order has been successfully delivered.';
-                    break;
+            $caseOrder = $delivery->appointment->caseOrder;
+
+            if ($validated['delivery_status'] === 'in transit') {
+                $notifMessage = 'Your order is now in transit and will arrive soon.';
+
+                // ✅ Send email to clinic
+                Mail::to($caseOrder->clinic->email)->send(
+                    new \App\Mail\DeliveryStatusMail($delivery, 'in transit', 'clinic')
+                );
+
+                // ✅ Send email to patient
+                Mail::to($caseOrder->patient->email)->send(
+                    new \App\Mail\DeliveryStatusMail($delivery, 'in transit', 'patient')
+                );
+            } elseif ($validated['delivery_status'] === 'delivered') {
+                $notifMessage = $statusMessage ?? 'Your order has been successfully delivered.';
+
+                // ✅ Send email to clinic
+                Mail::to($caseOrder->clinic->email)->send(
+                    new \App\Mail\DeliveryStatusMail($delivery, 'delivered', 'clinic')
+                );
+
+                // ✅ Send email to patient
+                Mail::to($caseOrder->patient->email)->send(
+                    new \App\Mail\DeliveryStatusMail($delivery, 'delivered', 'patient')
+                );
             }
 
+            // Send in-app notification
             if ($notifMessage) {
                 NotificationHelper::notifyClinic(
-                    $delivery->appointment->caseOrder->clinic_id,
+                    $caseOrder->clinic_id,
                     'delivery_status_update',
                     'Delivery Status Update',
                     "Case order CASE-" . str_pad($delivery->appointment->case_order_id, 5, '0', STR_PAD_LEFT) . ": " . $notifMessage,

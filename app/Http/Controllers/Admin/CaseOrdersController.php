@@ -10,6 +10,7 @@ use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class CaseOrdersController extends Controller
 {
@@ -138,6 +139,12 @@ class CaseOrdersController extends Controller
             'work_status' => 'pending'
         ]);
 
+        // ✅ Send email to clinic
+        Mail::to($caseOrder->clinic->email)->send(
+            new \App\Mail\AppointmentAssignedMail($appointment)
+        );
+
+        // Send in-app notifications
         NotificationHelper::notifyUser(
             $validated['technician_id'],
             'appointment_assigned',
@@ -158,7 +165,7 @@ class CaseOrdersController extends Controller
 
         return redirect()
             ->route('admin.case-orders.show', $id)
-            ->with('success', 'Appointment has been created and technician assigned successfully!');
+            ->with('success', 'Appointment has been created and clinic has been notified via email!');
     }
 
     // ========== DELIVERY MANAGEMENT ==========
