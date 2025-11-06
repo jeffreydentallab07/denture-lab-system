@@ -72,7 +72,7 @@
                 <strong>Case Type:</strong> {{ $caseOrder->case_type }}<br>
                 <strong>Patient:</strong> {{ $caseOrder->patient->name }}<br>
                 <strong>Technician:</strong> {{ $appointment->technician->name }}<br>
-                <strong>Scheduled Date:</strong> {{ $appointment->schedule_datetime->format('F j, Y g:i A') }}<br>
+                <strong>Estimated Completion:</strong> {{ $appointment->estimated_date->format('F j, Y') }}<br>
                 <strong>Purpose:</strong> {{ $appointment->purpose ?? 'Dental case work' }}
             </div>
 

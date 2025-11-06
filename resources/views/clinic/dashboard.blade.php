@@ -51,7 +51,7 @@
                                 <td class="px-4 py-2">{{ $appointment->caseOrder->patient->name ?? 'N/A' }}</td>
                                 <td class="px-4 py-2">{{ $appointment->technician->name ?? 'Not assigned' }}</td>
                                 <td class="px-4 py-2 text-[11px] text-gray-500">
-                                    {{ $appointment->schedule_datetime->format('M d, Y h:i A') }}
+                                    {{ $appointment->estimated_date->format('M d, Y') }}
                                 </td>
                                 <td class="px-4 py-2 text-center">
                                     <span class="bg-{{ $appointment->work_status == 'completed' ? 'green' : 'yellow' }}-200 

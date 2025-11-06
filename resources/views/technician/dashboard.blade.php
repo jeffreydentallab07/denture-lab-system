@@ -62,8 +62,7 @@
                                     $apt->caseOrder->clinic->clinic_name }}</p>
                                 <p class="text-xs md:text-sm text-gray-600">APT-{{ str_pad($apt->appointment_id, 5, '0',
                                     STR_PAD_LEFT) }}</p>
-                                <p class="text-xs md:text-sm text-gray-600">{{ $apt->schedule_datetime->format('h:i A')
-                                    }}</p>
+
                             </div>
                             <a href="{{ route('technician.appointments.show', $apt->appointment_id) }}"
                                 class="px-3 py-2 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 text-center">
@@ -109,8 +108,8 @@
                     <div class="space-y-2 text-xs text-gray-600 mb-3">
                         <p><span class="font-medium">Case Type:</span> {{ $appointment->caseOrder->case_type ?? 'N/A' }}
                         </p>
-                        <p><span class="font-medium">Schedule:</span> {{ $appointment->schedule_datetime->format('M d, Y
-                            h:i A') }}</p>
+                        <p><span class="font-medium">Schedule:</span> {{ $appointment->estimated_date->format('M d, Y')
+                            }}</p>
                         <p><span class="font-medium">Materials:</span> {{ $appointment->materialUsages->count() }}
                             material(s)</p>
                     </div>
@@ -166,7 +165,7 @@
                                 {{ $appointment->caseOrder->case_type ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">
-                                {{ $appointment->schedule_datetime->format('M d, Y h:i A') }}
+                                {{ $appointment->estimated_date->format('M d, Y') }}
                             </td>
                             <td class="px-6 py-4">
                                 <form

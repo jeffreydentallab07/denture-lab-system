@@ -28,7 +28,7 @@
                             <div>
                                 <h1 class="text-3xl font-bold">APT-{{ str_pad($appointment->appointment_id, 5, '0',
                                     STR_PAD_LEFT) }}</h1>
-                                <p class="text-blue-100 mt-2">{{ $appointment->schedule_datetime->format('M d, Y h:i A')
+                                <p class="text-blue-100 mt-2">{{ $appointment->estimated_date->format('M d, Y')
                                     }}</p>
                             </div>
                             <span
@@ -63,7 +63,7 @@
                             <div>
                                 <p class="text-sm text-gray-500">Scheduled Date</p>
                                 <p class="text-lg font-semibold text-gray-800">{{
-                                    $appointment->schedule_datetime->format('M d, Y h:i A') }}</p>
+                                    $appointment->estimated_date->format('M d, Y') }}</p>
                             </div>
                         </div>
 
@@ -251,11 +251,11 @@
                         </div>
                         @if($appointment->work_status !== 'completed')
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Time Until Scheduled</span>
+                            <span class="text-sm text-gray-600">Days Until Completion</span>
                             <span class="font-semibold text-gray-800">
-                                @if($appointment->schedule_datetime->isFuture())
-                                {{ $appointment->schedule_datetime->diffForHumans() }}
-                                @elseif($appointment->schedule_datetime->isToday())
+                                @if($appointment->estimated_date->isFuture())
+                                {{ $appointment->estimated_date->diffInDays(now()) }} days
+                                @elseif($appointment->estimated_date->isToday())
                                 <span class="text-blue-600">Today</span>
                                 @else
                                 <span class="text-orange-600">Overdue</span>

@@ -14,7 +14,7 @@ class AppointmentsController extends Controller
     public function index()
     {
         $appointments = Appointment::with(['caseOrder.clinic', 'caseOrder.patient', 'technician'])
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->paginate(15);
 
         return view('admin.appointments.index', compact('appointments'));
@@ -42,15 +42,16 @@ class AppointmentsController extends Controller
         $validated = $request->validate([
             'case_order_id' => 'required|exists:case_orders,co_id',
             'technician_id' => 'required|exists:users,id',
-            'schedule_datetime' => 'required|date|after:now',
+            'estimated_date' => 'required|date|after_or_equal:today',
             'purpose' => 'nullable|string',
         ]);
 
-        $validated['work_status'] = 'pending';
+        // Set default status to 'in-progress'
+        $validated['work_status'] = 'in-progress';
 
         $appointment = Appointment::create($validated);
 
-        // Update case order status to 'in-progress'
+        // Update case order status to 'in progress'
         $caseOrder = CaseOrder::findOrFail($validated['case_order_id']);
         $caseOrder->update(['status' => 'in progress']);
 
@@ -60,7 +61,7 @@ class AppointmentsController extends Controller
             $technician->id,
             'appointment_assigned',
             'New Work Assignment',
-            "You have been assigned to work on case order CASE-" . str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT) . " from " . $caseOrder->clinic->clinic_name . ". Scheduled: " . \Carbon\Carbon::parse($validated['schedule_datetime'])->format('M d, Y h:i A'),
+            "You have been assigned to work on case order CASE-" . str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT) . " from " . $caseOrder->clinic->clinic_name . ". Estimated completion: " . \Carbon\Carbon::parse($validated['estimated_date'])->format('M d, Y'),
             route('technician.dashboard'),
             $appointment->appointment_id
         );
@@ -93,9 +94,9 @@ class AppointmentsController extends Controller
         $validated = $request->validate([
             'case_order_id' => 'required|exists:case_orders,co_id',
             'technician_id' => 'required|exists:users,id',
-            'schedule_datetime' => 'required|date',
+            'estimated_date' => 'required|date|after_or_equal:today',
             'purpose' => 'nullable|string',
-            'work_status' => 'required|in:pending,in-progress,completed',
+            'work_status' => 'required|in:pending,in-progress,completed,cancelled',
         ]);
 
         $appointment->update($validated);
@@ -118,14 +119,14 @@ class AppointmentsController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         $validated = $request->validate([
-            'schedule_datetime' => 'required|date|after:now',
+            'estimated_date' => 'required|date|after_or_equal:today',
             'reschedule_reason' => 'nullable|string',
         ]);
 
-        $oldDateTime = $appointment->schedule_datetime->format('M d, Y h:i A');
+        $oldDate = $appointment->estimated_date->format('M d, Y');
 
         $appointment->update([
-            'schedule_datetime' => $validated['schedule_datetime'],
+            'estimated_date' => $validated['estimated_date'],
         ]);
 
         // Notify technician about reschedule
@@ -133,7 +134,7 @@ class AppointmentsController extends Controller
             $appointment->technician_id,
             'appointment_rescheduled',
             'Appointment Rescheduled',
-            "Your appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " has been rescheduled from {$oldDateTime} to " . \Carbon\Carbon::parse($validated['schedule_datetime'])->format('M d, Y h:i A') . ". Reason: " . ($validated['reschedule_reason'] ?? 'Not specified'),
+            "Your appointment APT-" . str_pad($appointment->appointment_id, 5, '0', STR_PAD_LEFT) . " has been rescheduled from {$oldDate} to " . \Carbon\Carbon::parse($validated['estimated_date'])->format('M d, Y') . ". Reason: " . ($validated['reschedule_reason'] ?? 'Not specified'),
             route('technician.appointments.show', $appointment->appointment_id),
             $appointment->appointment_id
         );

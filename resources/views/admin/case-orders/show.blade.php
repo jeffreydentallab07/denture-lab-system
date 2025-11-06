@@ -270,7 +270,7 @@
 
                                 <div class="mt-2 text-sm text-gray-600 space-y-1">
                                     <p><strong>Technician:</strong> {{ $appointment->technician->name }}</p>
-                                    <p><strong>Scheduled:</strong> {{ $appointment->schedule_datetime->format('F j, Y
+                                    <p><strong>Scheduled:</strong> {{ $appointment->estimated_date->format('F j, Y
                                         g:i A') }}</p>
 
                                     @if($appointment->delivery)

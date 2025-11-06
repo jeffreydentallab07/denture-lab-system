@@ -144,7 +144,7 @@ class TechnicianController extends Controller
         // Load appointments assigned to the technician with related clinic and material
         $appointments = Appointment::with(['caseOrder.clinic', 'material'])
             ->where('technician_id', $user->id)
-            ->orderBy('schedule_datetime', 'desc')
+            ->orderBy('estimated_date', 'desc')
             ->get();
 
         // Load all materials to populate the dropdowns

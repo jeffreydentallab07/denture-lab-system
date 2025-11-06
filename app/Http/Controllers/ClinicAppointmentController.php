@@ -16,7 +16,7 @@ class ClinicAppointmentController extends Controller
             ->whereHas('caseOrder', function ($query) use ($clinic_id) {
                 $query->where('clinic_id', $clinic_id);
             })
-            ->orderBy('schedule_datetime', 'desc')
+            ->orderBy('estimated_date', 'desc')
             ->get();
 
         return view('clinic.appointments.index', compact('appointments'));

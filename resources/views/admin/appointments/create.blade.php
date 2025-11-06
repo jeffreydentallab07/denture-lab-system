@@ -88,16 +88,15 @@
                         creation.</p>
                 </div>
 
-                <!-- Schedule Date & Time -->
+                <!-- Estimated Completion Date -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Schedule Date & Time <span class="text-red-500">*</span>
+                        Estimated Completion Date <span class="text-red-500">*</span>
                     </label>
-                    <input type="datetime-local" name="schedule_datetime" min="{{ date('Y-m-d\TH:i') }}" required
+                    <input type="date" name="estimated_date" min="{{ date('Y-m-d') }}" required
                         class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Select the date and time for this appointment</p>
+                    <p class="text-xs text-gray-500 mt-1">Select the estimated date when work should be completed</p>
                 </div>
-
 
                 <!-- Purpose/Notes -->
                 <div>
@@ -108,26 +107,6 @@
                         class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:outline-none"
                         placeholder="Describe the work to be done, any special instructions, etc."></textarea>
                 </div>
-
-                <!-- Info Box -->
-                {{-- <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
-                    <div class="flex items-start">
-                        <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <div>
-                            <h4 class="text-sm font-semibold text-blue-800 mb-1">What happens after creation?</h4>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• Case order status will change to "In Progress"</li>
-                                <li>• Technician will receive an instant notification</li>
-                                <li>• Technician can view work details and select materials needed</li>
-                                <li>• You can track progress from the appointments dashboard</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div> --}}
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-3 pt-4 border-t">
@@ -162,17 +141,15 @@ if (caseOrderSelect) {
     });
 }
 
-// Set default datetime to 1 hour from now
-const now = new Date();
-now.setHours(now.getHours() + 1);
-const year = now.getFullYear();
-const month = String(now.getMonth() + 1).padStart(2, '0');
-const day = String(now.getDate()).padStart(2, '0');
-const hours = String(now.getHours()).padStart(2, '0');
-const minutes = String(now.getMinutes()).padStart(2, '0');
-const datetimeInput = document.querySelector('input[name="schedule_datetime"]');
-if (datetimeInput) {
-    datetimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+// Set default date to tomorrow
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const year = tomorrow.getFullYear();
+const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+const day = String(tomorrow.getDate()).padStart(2, '0');
+const dateInput = document.querySelector('input[name="estimated_date"]');
+if (dateInput) {
+    dateInput.value = `${year}-${month}-${day}`;
 }
 </script>
 @endsection

@@ -16,7 +16,7 @@ class AppointmentsController extends Controller
             ->whereHas('caseOrder', function ($query) use ($clinic) {
                 $query->where('clinic_id', $clinic->clinic_id);
             })
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->paginate(15);
 
         return view('clinic.appointments.index', compact('appointments'));

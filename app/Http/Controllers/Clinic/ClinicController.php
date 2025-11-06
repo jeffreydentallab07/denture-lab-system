@@ -33,7 +33,7 @@ class ClinicController extends Controller
             $query->where('clinic_id', $clinic->clinic_id);
         })
             ->with(['caseOrder.patient', 'technician'])
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->take(5)
             ->get();
 

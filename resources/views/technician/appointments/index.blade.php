@@ -85,9 +85,9 @@
                                 </path>
                             </svg>
                             <p class="text-xs md:text-sm text-gray-700 flex-1">
-                                <span class="hidden md:inline">{{ $appointment->schedule_datetime->format('M d, Y h:i
-                                    A') }}</span>
-                                <span class="md:hidden">{{ $appointment->schedule_datetime->format('M d, Y') }}</span>
+                                <span class="hidden md:inline">{{ $appointment->estimated_date->format('M d, Y')
+                                    }}</span>
+                                <span class="md:hidden">{{ $appointment->estimated_date->format('M d, Y') }}</span>
                             </p>
                         </div>
                     </div>

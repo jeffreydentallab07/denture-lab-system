@@ -39,7 +39,7 @@ class AppointmentController extends Controller
         Appointment::create([
             'co_id' => $caseOrder->co_id,
             'technician_id' => null,
-            'schedule_datetime' => now(),
+            'estimated_date' => now()->toDateString(),
             'material_id' => null,
             'priority_level' => 'Normal',
             'purpose' => 'initial',

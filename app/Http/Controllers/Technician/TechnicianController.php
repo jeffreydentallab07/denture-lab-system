@@ -25,7 +25,7 @@ class TechnicianController extends Controller
         $appointments = Appointment::with(['caseOrder.clinic', 'caseOrder.patient', 'materialUsages.material'])
             ->where('technician_id', $technician->id)
             ->whereIn('work_status', ['pending', 'in-progress']) // Only show active appointments
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->get();
 
         // Get all available materials
@@ -43,7 +43,7 @@ class TechnicianController extends Controller
         // Today's appointments
         $todayAppointments = Appointment::with(['caseOrder.clinic'])
             ->where('technician_id', $technician->id)
-            ->whereDate('schedule_datetime', today())
+            ->whereDate('estimated_date', today())
             ->get();
 
         // Notifications
@@ -270,7 +270,7 @@ class TechnicianController extends Controller
 
         $appointments = Appointment::with(['caseOrder.clinic', 'materialUsages'])
             ->where('technician_id', $technician->id)
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->get();
 
         // Notifications

@@ -46,7 +46,7 @@
                 @forelse($technician->appointments->take(10) as $appointment)
                 <div class="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded">
                     <p class="font-semibold">{{ $appointment->caseOrder->clinic->clinic_name ?? 'N/A' }}</p>
-                    <p class="text-sm text-gray-600">{{ $appointment->schedule_datetime->format('M d, Y h:i A') }}</p>
+                    <p class="text-sm text-gray-600">{{ $appointment->estimated_date->format('M d, Y') }}</p>
                     <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">{{ $appointment->work_status
                         }}</span>
                 </div>

@@ -26,8 +26,8 @@
                             <div>
                                 <h1 class="text-3xl font-bold">APT-{{ str_pad($appointment->appointment_id, 5, '0',
                                     STR_PAD_LEFT) }}</h1>
-                                <p class="text-blue-100 mt-2">{{ $appointment->schedule_datetime->format('M d, Y h:i A')
-                                    }}</p>
+                                <p class="text-blue-100 mt-2">Est. Completion: {{
+                                    $appointment->estimated_date->format('M d, Y') }}</p>
                             </div>
                             <span class="px-4 py-2 text-sm rounded-full font-semibold
     {{ $appointment->work_status === 'pending' ? 'bg-yellow-500 text-white' : 
@@ -56,9 +56,9 @@
                                 </a>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Scheduled Date & Time</p>
+                                <p class="text-sm text-gray-500">Estimated Completion Date</p>
                                 <p class="text-lg font-semibold text-gray-800">{{
-                                    $appointment->schedule_datetime->format('M d, Y h:i A') }}</p>
+                                    $appointment->estimated_date->format('M d, Y') }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Work Status</p>
@@ -155,9 +155,9 @@
                                         $usage->material->unit }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">₱{{
                                         number_format($usage->material->price, 2) }}</td>
-                                    <td class="px-4 py-3 text-sm font-semibold text-green-600">₱{{
+                                    <td class="px-4 py-3 text-sm font-semibold text-gray-800">₱{{
                                         number_format($usage->total_cost, 2) }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">{{ $usage->notes ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ $usage->notes ?? 'N/A' }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -165,7 +165,7 @@
                                 <tr>
                                     <td colspan="3" class="px-4 py-3 text-sm font-bold text-gray-800 text-right">Total
                                         Material Cost:</td>
-                                    <td class="px-4 py-3 text-sm font-bold text-green-600">₱{{
+                                    <td class="px-4 py-3 text-sm font-bold text-blue-600">₱{{
                                         number_format($appointment->total_material_cost, 2) }}</td>
                                     <td></td>
                                 </tr>
@@ -173,10 +173,96 @@
                         </table>
                     </div>
                 </div>
-                @else
+                @endif
+
+                <!-- Delivery Information -->
+                @if($appointment->delivery)
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Materials Used</h2>
-                    <p class="text-gray-500 text-center py-4">No materials have been used yet.</p>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Delivery Information</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Delivery Status</p>
+                            <span
+                                class="inline-block mt-1 px-3 py-1 text-xs rounded-full font-medium
+                                {{ $appointment->delivery->delivery_status === 'ready to deliver' ? 'bg-yellow-100 text-yellow-800' : 
+                                   ($appointment->delivery->delivery_status === 'in transit' ? 'bg-blue-100 text-blue-800' : 
+                                   ($appointment->delivery->delivery_status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                                {{ ucfirst($appointment->delivery->delivery_status) }}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Assigned Rider</p>
+                            <p class="text-lg font-semibold text-gray-800">{{ $appointment->delivery->rider->name ??
+                                'N/A'
+                                }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Delivery Date</p>
+                            <p class="text-lg font-semibold text-gray-800">{{
+                                $appointment->delivery->delivery_date->format('M d, Y') }}</p>
+                        </div>
+                        @if($appointment->delivery->delivered_at)
+                        <div>
+                            <p class="text-sm text-gray-500">Delivered At</p>
+                            <p class="text-lg font-semibold text-gray-800">{{
+                                $appointment->delivery->delivered_at->format('M d, Y h:i A') }}</p>
+                        </div>
+                        @endif
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{{ route('admin.case-orders.show', $appointment->case_order_id) }}"
+                            class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            View Full Case Order Details
+                        </a>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Billing Information -->
+                @if($appointment->billing)
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Billing Information</h2>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Material Cost:</span>
+                            <span class="font-semibold">₱{{ number_format($appointment->billing->material_cost, 2)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Labor Cost:</span>
+                            <span class="font-semibold">₱{{ number_format($appointment->billing->labor_cost, 2)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Delivery Fee:</span>
+                            <span class="font-semibold">₱{{ number_format($appointment->billing->delivery_fee, 2)
+                                }}</span>
+                        </div>
+                        @if($appointment->billing->additional_amount > 0)
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Additional ({{ $appointment->billing->additional_details
+                                }}):</span>
+                            <span class="font-semibold">₱{{ number_format($appointment->billing->additional_amount, 2)
+                                }}</span>
+                        </div>
+                        @endif
+                        <div class="flex justify-between border-t pt-3">
+                            <span class="text-lg font-bold text-gray-800">Total Amount:</span>
+                            <span class="text-lg font-bold text-blue-600">₱{{
+                                number_format($appointment->billing->total_amount, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Payment Status:</span>
+                            <span
+                                class="px-3 py-1 text-xs rounded-full font-medium
+                                {{ $appointment->billing->payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                {{ ucfirst($appointment->billing->payment_status) }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 @endif
 
@@ -185,125 +271,73 @@
             <!-- Sidebar -->
             <div class="space-y-6">
 
-                <!-- Quick Actions -->
+                <!-- Actions Card -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Actions</h3>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Actions</h2>
 
                     <div class="space-y-3">
-                        <!-- Reschedule Appointment -->
+                        @if($appointment->work_status !== 'cancelled')
                         <button onclick="openRescheduleModal()"
-                            class="block w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition">
-                            Reschedule Appointment
+                            class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium">
+                            📅 Reschedule
                         </button>
 
-                        <!-- View Case Order -->
-                        <a href="{{ route('admin.case-orders.show', $appointment->case_order_id) }}"
-                            class="block w-full bg-purple-600 text-white text-center py-2 rounded-lg hover:bg-purple-700 transition">
-                            View Case Order
-                        </a>
-
-                        <!-- Cancel Appointment -->
-                        @if($appointment->work_status !== 'completed' && $appointment->work_status !== 'cancelled')
                         <button onclick="confirmCancel()"
-                            class="block w-full bg-orange-600 text-white text-center py-2 rounded-lg hover:bg-orange-700 transition">
-                            Cancel Appointment
+                            class="w-full px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm font-medium">
+                            ⚠️ Cancel Appointment
                         </button>
                         @endif
 
-                        <!-- Delete Appointment -->
+                        <a href="{{ route('admin.appointments.edit', $appointment->appointment_id) }}"
+                            class="block w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium text-center">
+                            ✏️ Edit Details
+                        </a>
+
                         <button onclick="confirmDelete()"
-                            class="block w-full bg-red-600 text-white text-center py-2 rounded-lg hover:bg-red-700 transition">
-                            Delete Appointment
+                            class="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
+                            🗑️ Delete
                         </button>
-
-                        <!-- Create Billing (if completed and no billing exists) -->
-                        @if($appointment->work_status === 'completed' && !$appointment->billing)
-                        <a href="{{ route('admin.billing.create', ['appointment' => $appointment->appointment_id]) }}"
-                            class="block w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700 transition">
-                            Create Billing
-                        </a>
-                        @endif
-
-                        <!-- View Billing (if exists) -->
-                        @if($appointment->billing)
-                        <a href="{{ route('admin.billing.show', $appointment->billing->id) }}"
-                            class="block w-full bg-purple-600 text-white text-center py-2 rounded-lg hover:bg-purple-700 transition">
-                            View Billing
-                        </a>
-                        @endif
-                    </div>
-
-                    <!-- Info Note -->
-                    <div class="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 text-xs">
-                        <p class="text-blue-700">
-                            <strong>Note:</strong> Only the assigned technician can update the work status and add
-                            materials used.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Status Timeline -->
+                <!-- Quick Stats -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Timeline</h3>
-
-                    <div class="space-y-4">
-                        <div class="flex gap-3">
-                            <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">Appointment Created</p>
-                                <p class="text-xs text-gray-500">{{ $appointment->created_at->format('M d, Y h:i A') }}
-                                </p>
-                            </div>
-                        </div>
-
-                        @if($appointment->work_status === 'in-progress')
-                        <div class="flex gap-3">
-                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">Work In Progress</p>
-                                <p class="text-xs text-gray-500">{{ $appointment->updated_at->format('M d, Y h:i A') }}
-                                </p>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if($appointment->work_status === 'completed')
-                        <div class="flex gap-3">
-                            <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">Work Completed</p>
-                                <p class="text-xs text-gray-500">{{ $appointment->updated_at->format('M d, Y h:i A') }}
-                                </p>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Statistics -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Statistics</h3>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">Quick Info</h2>
 
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Materials Used</span>
-                            <span class="font-semibold text-gray-800">{{ $appointment->materialUsages->count() }}</span>
+                            <span class="text-sm text-gray-600">Created</span>
+                            <span class="font-semibold text-gray-800">{{ $appointment->created_at->format('M d, Y')
+                                }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Total Cost</span>
-                            <span class="font-semibold text-green-600">₱{{
-                                number_format($appointment->total_material_cost, 2) }}</span>
+                            <span class="text-sm text-gray-600">Last Updated</span>
+                            <span class="font-semibold text-gray-800">{{ $appointment->updated_at->diffForHumans()
+                                }}</span>
                         </div>
+                        @php
+                        use Carbon\Carbon;
+
+                        $estimated = Carbon::parse($appointment->estimated_date);
+                        $days = now()->diffInDays($estimated, false);
+                        @endphp
+
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Days Until Appointment</span>
+                            <span class="text-sm text-gray-600">Days Until Completion</span>
                             <span class="font-semibold text-gray-800">
-                                @if($appointment->schedule_datetime->isFuture())
-                                {{ $appointment->schedule_datetime->diffInDays(now()) }} days
+                                @if($estimated->isFuture())
+                                {{ abs((int) round($days)) }} {{ abs((int) round($days)) === 1 ? 'day' : 'days' }}
+                                @elseif($estimated->isToday())
+                                <span class="text-blue-600">Today</span>
                                 @else
-                                <span class="text-red-500">Overdue</span>
+                                @php $overdue = abs((int) round($days)); @endphp
+                                <span class="text-red-500">
+                                    Overdue by {{ $overdue }} {{ $overdue === 1 ? 'day' : 'days' }}
+                                </span>
                                 @endif
                             </span>
                         </div>
+
                     </div>
                 </div>
 
@@ -322,9 +356,9 @@
             @method('PUT')
 
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">New Date & Time</label>
-                <input type="datetime-local" name="schedule_datetime" min="{{ date('Y-m-d\TH:i') }}"
-                    value="{{ $appointment->schedule_datetime->format('Y-m-d\TH:i') }}" required
+                <label class="block text-sm font-medium text-gray-700 mb-2">New Estimated Completion Date</label>
+                <input type="date" name="estimated_date" min="{{ date('Y-m-d') }}"
+                    value="{{ $appointment->estimated_date->format('Y-m-d') }}" required
                     class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none">
             </div>
 

@@ -40,7 +40,7 @@
                 @forelse($recentAppointments as $appointment)
                 <div class="border-l-4 border-blue-500 pl-4 py-2">
                     <p class="font-semibold">{{ $appointment->caseOrder->clinic->clinic_name ?? 'N/A' }}</p>
-                    <p class="text-sm text-gray-600">{{ $appointment->schedule_datetime->format('M d, Y h:i A') }}</p>
+                    <p class="text-sm text-gray-600">{{ $appointment->estimated_date->format('M d, Y') }}</p>
                     <div class="text-xs w-fit px-2 py-1 bg-blue-100 text-blue-800 rounded">{{ $appointment->work_status
                         }}</div>
                 </div>

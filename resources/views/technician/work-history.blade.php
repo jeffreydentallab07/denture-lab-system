@@ -128,7 +128,7 @@
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                         </path>
                                     </svg>
-                                    <span>Scheduled: {{ $appointment->schedule_datetime->format('M d, Y') }}</span>
+                                    <span>Est. Completion: {{ $appointment->estimated_date->format('M d, Y') }}</span>
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 md:w-4 md:h-4 flex-shrink-0" fill="none"

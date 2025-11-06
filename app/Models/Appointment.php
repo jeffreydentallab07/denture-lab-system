@@ -14,13 +14,13 @@ class Appointment extends Model
     protected $fillable = [
         'case_order_id',
         'technician_id',
-        'schedule_datetime',
+        'estimated_date',
         'purpose',
         'work_status',
     ];
 
     protected $casts = [
-        'schedule_datetime' => 'datetime',
+        'estimated_date' => 'date',
     ];
 
     // Relationships
@@ -38,6 +38,7 @@ class Appointment extends Model
     {
         return $this->hasOne(Delivery::class, 'appointment_id', 'appointment_id');
     }
+
     public function billing()
     {
         return $this->hasOne(Billing::class, 'appointment_id', 'appointment_id');

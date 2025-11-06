@@ -30,7 +30,7 @@
                     <th class="px-6 py-3 text-left">Clinic</th>
                     <th class="px-6 py-3 text-left">Patient</th>
                     <th class="px-6 py-3 text-left">Technician</th>
-                    <th class="px-6 py-3 text-left">Schedule</th>
+                    <th class="px-6 py-3 text-left">Est. Completion</th>
                     <th class="px-6 py-3 text-left">Status</th>
                     <th class="px-6 py-3 text-left">Actions</th>
                 </tr>
@@ -49,7 +49,7 @@
                     <td class="px-6 py-3">{{ $appointment->caseOrder->clinic->clinic_name ?? 'N/A' }}</td>
                     <td class="px-6 py-3">{{ $appointment->caseOrder->patient->name ?? 'N/A' }}</td>
                     <td class="px-6 py-3">{{ $appointment->technician->name ?? 'N/A' }}</td>
-                    <td class="px-6 py-3 text-sm">{{ $appointment->schedule_datetime->format('M d, Y h:i A') }}</td>
+                    <td class="px-6 py-3 text-sm">{{ $appointment->estimated_date->format('M d, Y') }}</td>
                     <td class="px-6 py-3">
                         <span
                             class="px-2 py-1 text-xs rounded-full font-medium

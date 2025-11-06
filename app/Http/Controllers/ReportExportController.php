@@ -52,8 +52,8 @@ class ReportExportController extends Controller
         // Headers + fields based on report type
         switch ($type) {
             case 'appointments':
-                $headers = ['ID', 'Patient Name', 'Schedule Date', 'Status'];
-                $fields  = ['id', 'patient_name', 'schedule_datetime', 'status'];
+                $headers = ['ID', 'Patient Name', 'Estimated Date', 'Status'];
+                $fields  = ['id', 'patient_name', 'estimated_date', 'status'];
                 break;
             case 'deliveries':
                 $headers = ['ID', 'Case Order ID', 'Delivered By', 'Created At'];
@@ -122,7 +122,7 @@ class ReportExportController extends Controller
     {
         switch ($type) {
             case 'appointments':
-                return Appointment::whereBetween('schedule_datetime', [$from, $to])->get();
+                return Appointment::whereBetween('estimated_date', [$from, $to])->get();
             case 'deliveries':
                 return Delivery::whereBetween('created_at', [$from, $to])->get();
             case 'billing':

@@ -89,10 +89,10 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Schedule Date & Time <span class="text-red-500">*</span>
                         </label>
-                        <input type="datetime-local" name="schedule_datetime" required
-                            min="{{ date('Y-m-d\TH:i', strtotime('+1 hour')) }}" value="{{ old('schedule_datetime') }}"
+                        <input type="datetime-local" name="estimated_date" required
+                            min="{{ date('Y-m-d', strtotime('+1 hour')) }}" value="{{ old('estimated_date') }}"
                             class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        @error('schedule_datetime')
+                        @error('estimated_date')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>

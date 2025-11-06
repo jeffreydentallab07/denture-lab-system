@@ -127,14 +127,14 @@ class CaseOrdersController extends Controller
 
         $validated = $request->validate([
             'technician_id' => 'required|exists:users,id',
-            'schedule_datetime' => 'required|date|after:now',
+            'estimated_date' => 'required|date|after:now',
             'purpose' => 'nullable|string|max:500'
         ]);
 
         $appointment = Appointment::create([
             'case_order_id' => $caseOrder->co_id,
             'technician_id' => $validated['technician_id'],
-            'schedule_datetime' => $validated['schedule_datetime'],
+            'estimated_date' => $validated['estimated_date'],
             'purpose' => $validated['purpose'] ?? ($caseOrder->submission_count > 0 ? 'Revision/Adjustment Work' : 'Initial Work'),
             'work_status' => 'pending'
         ]);
@@ -158,7 +158,7 @@ class CaseOrdersController extends Controller
             $caseOrder->clinic_id,
             'appointment_scheduled',
             'Work Scheduled',
-            "Work has been scheduled for Case Order CASE-" . str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT) . " on " . \Carbon\Carbon::parse($validated['schedule_datetime'])->format('M j, Y g:i A'),
+            "Work has been scheduled for Case Order CASE-" . str_pad($caseOrder->co_id, 5, '0', STR_PAD_LEFT) . " on " . \Carbon\Carbon::parse($validated['estimated_date'])->format('M j, Y'),
             route('clinic.case-orders.show', $caseOrder->co_id),
             $appointment->appointment_id
         );

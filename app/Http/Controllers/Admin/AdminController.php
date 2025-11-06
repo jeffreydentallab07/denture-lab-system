@@ -22,7 +22,7 @@ class AdminController extends Controller
 
         // Recent appointments
         $recentAppointments = Appointment::with(['caseOrder.clinic', 'technician'])
-            ->latest('schedule_datetime')
+            ->latest('estimated_date')
             ->take(10)
             ->get();
 
