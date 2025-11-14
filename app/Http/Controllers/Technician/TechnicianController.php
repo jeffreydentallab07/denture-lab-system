@@ -14,9 +14,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Mail\AppointmentCompletedMail;
+use App\Services\SmsNotifier;
 
 class TechnicianController extends Controller
 {
+
+    protected $smsNotifier;
+
+    public function __construct(SmsNotifier $smsNotifier)
+    {
+        $this->smsNotifier = $smsNotifier;
+    }
+
     public function dashboard()
     {
         $technician = Auth::user();
@@ -127,6 +136,15 @@ class TechnicianController extends Controller
                     route('clinic.case-orders.show', $appointment->caseOrder->co_id),
                     $appointment->appointment_id
                 );
+
+                try {
+                    $this->smsNotifier->notifyWorkCompleted($appointment);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send work completed SMS', [
+                        'appointment_id' => $appointment->appointment_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             // If work started (changed to in progress)
@@ -154,6 +172,15 @@ class TechnicianController extends Controller
                     route('clinic.case-orders.show', $appointment->caseOrder->co_id),
                     $appointment->appointment_id
                 );
+
+                try {
+                    $this->smsNotifier->notifyWorkStarted($appointment);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send work started SMS', [
+                        'appointment_id' => $appointment->appointment_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
         }
 

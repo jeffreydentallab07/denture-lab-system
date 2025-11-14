@@ -10,10 +10,20 @@ use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\SmsNotifier;
 
 class CaseOrdersController extends Controller
 {
+
+    protected $smsNotifier;
+
+    public function __construct(SmsNotifier $smsNotifier)
+    {
+        $this->smsNotifier = $smsNotifier;
+    }
+
     public function index()
     {
         $caseOrders = CaseOrder::with(['clinic', 'patient', 'dentist'])
@@ -98,6 +108,16 @@ class CaseOrdersController extends Controller
             $pickup->pickup_id
         );
 
+        try {
+            $this->smsNotifier->notifyPickupScheduled($pickup);
+        } catch (\Exception $e) {
+            Log::error('Failed to send pickup scheduled SMS', [
+                'pickup_id' => $pickup->pickup_id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+
         return redirect()
             ->route('admin.case-orders.show', $id)
             ->with('success', 'Pickup has been created and rider assigned successfully!');
@@ -163,6 +183,16 @@ class CaseOrdersController extends Controller
             $appointment->appointment_id
         );
 
+        // Send SMS to clinic
+        try {
+            $this->smsNotifier->notifyAppointmentScheduled($appointment);
+        } catch (\Exception $e) {
+            Log::error('Failed to send appointment scheduled SMS', [
+                'appointment_id' => $appointment->appointment_id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
         return redirect()
             ->route('admin.case-orders.show', $id)
             ->with('success', 'Appointment has been created and clinic has been notified via email!');
@@ -227,6 +257,15 @@ class CaseOrdersController extends Controller
             $delivery->delivery_id
         );
 
+
+        try {
+            $this->smsNotifier->notifyDeliveryScheduled($delivery);
+        } catch (\Exception $e) {
+            Log::error('Failed to send delivery scheduled SMS', [
+                'delivery_id' => $delivery->delivery_id,
+                'error' => $e->getMessage()
+            ]);
+        }
         // Redirect to billing creation with appointment parameter
         return redirect()
             ->route('admin.billing.create', ['appointment' => $caseOrder->latestAppointment->appointment_id])

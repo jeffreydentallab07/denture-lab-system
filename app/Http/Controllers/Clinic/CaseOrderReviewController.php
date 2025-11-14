@@ -7,10 +7,21 @@ use App\Models\CaseOrder;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\NotificationHelper;
+use App\Services\SmsNotifier;
 
 class CaseOrderReviewController extends Controller
 {
+
+    protected $smsNotifier;
+
+    public function __construct(SmsNotifier $smsNotifier)
+    {
+        $this->smsNotifier = $smsNotifier;
+    }
+
+
     /**
      * Show review page for a case order
      */
@@ -74,6 +85,17 @@ class CaseOrderReviewController extends Controller
                 route('technician.appointments.show', $caseOrder->latestAppointment->appointment_id),
                 $caseOrder->co_id
             );
+
+            if ($caseOrder->latestAppointment && $caseOrder->latestAppointment->technician_id) {
+                try {
+                    $this->smsNotifier->notifyCaseApproved($caseOrder, $caseOrder->latestAppointment->technician_id);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send case approved SMS', [
+                        'case_order_id' => $caseOrder->co_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
         }
 
         return redirect()
@@ -126,6 +148,18 @@ class CaseOrderReviewController extends Controller
                 route('technician.appointments.show', $caseOrder->latestAppointment->appointment_id),
                 $caseOrder->co_id
             );
+        }
+
+        // Send SMS to technician
+        if ($caseOrder->latestAppointment && $caseOrder->latestAppointment->technician_id) {
+            try {
+                $this->smsNotifier->notifyAdjustmentRequested($caseOrder, $caseOrder->latestAppointment->technician_id);
+            } catch (\Exception $e) {
+                Log::error('Failed to send adjustment requested SMS', [
+                    'case_order_id' => $caseOrder->co_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
 
         return redirect()

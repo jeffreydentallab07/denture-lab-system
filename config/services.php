@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'iprogtech' => [
+        'api_token' => env('IPROGTECH_API_TOKEN'),
+        'api_url' => 'https://sms.iprogtech.com/api/v1/',
+    ],
+
 ];

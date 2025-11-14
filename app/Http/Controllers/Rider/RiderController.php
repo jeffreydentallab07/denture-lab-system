@@ -7,10 +7,20 @@ use App\Models\Pickup;
 use App\Models\Notification;
 use App\Helpers\NotificationHelper;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Services\SmsNotifier;
 
 class RiderController extends Controller
 {
+
+    protected $smsNotifier;
+
+    public function __construct(SmsNotifier $smsNotifier)
+    {
+        $this->smsNotifier = $smsNotifier;
+    }
+
     public function dashboard()
     {
         $rider = Auth::user();
@@ -89,7 +99,19 @@ class RiderController extends Controller
                 route('clinic.notifications.index'),
                 $pickup->case_order_id
             );
+
+            // Send SMS to clinic
+            try {
+                $this->smsNotifier->notifyPickupCompleted($pickup);
+            } catch (\Exception $e) {
+                Log::error('Failed to send pickup completed SMS', [
+                    'pickup_id' => $pickup->pickup_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
+
+
 
         return redirect()->route('rider.dashboard')
             ->with('success', 'Pickup status updated successfully. Case order is now ready for appointment.');

@@ -8,11 +8,19 @@ use App\Models\CaseOrder;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Helpers\NotificationHelper;
+use App\Services\SmsNotifier;
 
 class DeliveriesController extends Controller
 {
+    protected $smsNotifier;
+
+    public function __construct(SmsNotifier $smsNotifier)
+    {
+        $this->smsNotifier = $smsNotifier;
+    }
     public function index()
     {
         $rider = Auth::user();
@@ -127,6 +135,15 @@ class DeliveriesController extends Controller
                 Mail::to($caseOrder->patient->email)->send(
                     new \App\Mail\DeliveryStatusMail($delivery, 'in transit', 'patient')
                 );
+
+                try {
+                    $this->smsNotifier->notifyDeliveryInTransit($delivery);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send in transit SMS', [
+                        'delivery_id' => $delivery->delivery_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             } elseif ($validated['delivery_status'] === 'delivered') {
                 $notifMessage = $statusMessage ?? 'Your order has been successfully delivered.';
 
@@ -139,6 +156,15 @@ class DeliveriesController extends Controller
                 Mail::to($caseOrder->patient->email)->send(
                     new \App\Mail\DeliveryStatusMail($delivery, 'delivered', 'patient')
                 );
+
+                try {
+                    $this->smsNotifier->notifyDeliveryCompleted($delivery);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send delivery completed SMS', [
+                        'delivery_id' => $delivery->delivery_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             // Send in-app notification
