@@ -9,22 +9,26 @@
     <title>@yield('title', 'Technician Dashboard')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .notification-popup-transition {
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+
         .sidebar-transition {
             transition: transform 0.3s ease-in-out;
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="h-screen flex bg-white text-[12px]">
 
     <!-- Mobile Overlay -->
-    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="fixed top-0 left-0 w-64 h-full bg-blue-900 text-white flex flex-col z-40 transform -translate-x-full md:translate-x-0 sidebar-transition">
-        <div class="h-16 md:h-20 px-4 border-b border-blue-700 flex items-center justify-between">
-            <img src="{{ asset('images/logo2.png') }}" alt="Logo" class="h-10 md:h-12 object-contain">
+        class="w-48 bg-blue-900 text-white flex flex-col fixed top-0 left-0 h-full z-40 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="h-20 px-3 border-b border-blue-700 flex items-center justify-between">
+            <img src="{{ asset('images/logo2.png') }}" alt="Logo" class="h-12 object-contain">
             <!-- Close button (mobile only) -->
             <button id="close-sidebar-btn" class="md:hidden text-white p-2 hover:bg-blue-800 rounded">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,12 +37,12 @@
             </button>
         </div>
 
-        <!-- Navigation -->
-        <nav class="mt-4 flex-grow space-y-1 px-3 overflow-y-auto">
+        <nav class="mt-4 flex-grow space-y-1 overflow-y-auto">
             <a href="{{ route('technician.dashboard') }}"
-                class="flex items-center space-x-3 p-3 rounded-lg transition
-                      {{ request()->routeIs('technician.dashboard') ? 'bg-white text-blue-900 font-semibold' : 'text-white hover:bg-blue-800' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                class="flex items-center space-x-2 p-2 rounded-l-lg transition duration-150 
+                          hover:bg-gray-300 hover:text-blue-900 
+                          {{ request()->routeIs('technician.dashboard') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
                     <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
                 </svg>
@@ -46,30 +50,38 @@
             </a>
 
             <a href="{{ route('technician.appointments.index') }}"
-                class="flex items-center space-x-3 p-3 rounded-lg transition
-                      {{ request()->routeIs('technician.appointments.*') ? 'bg-white text-blue-900 font-semibold' : 'text-white hover:bg-blue-800' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                class="flex items-center space-x-2 p-2 rounded-l-lg transition duration-150 
+                          hover:bg-gray-300 hover:text-blue-900 
+                          {{ request()->routeIs('technician.appointments.*') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
-                    <path
-                        d="M8 7V3m8 4V3m-9 8h10m-10 4h10M4 21h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <span>My Appointments</span>
             </a>
 
             <a href="{{ route('technician.materials.index') }}"
-                class="flex items-center space-x-3 p-3 rounded-lg transition
-                      {{ request()->routeIs('technician.materials.*') ? 'bg-white text-blue-900 font-semibold' : 'text-white hover:bg-blue-800' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                class="flex items-center space-x-2 p-2 rounded-l-lg transition duration-150 
+                          hover:bg-gray-300 hover:text-blue-900 
+                          {{ request()->routeIs('technician.materials.*') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
-                    <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                    <path d="M3.3 7l8.7 5 8.7-5" />
+                    <path d="M12 22V12" />
                 </svg>
                 <span>Materials</span>
             </a>
 
             <a href="{{ route('technician.work-history') }}"
-                class="flex items-center space-x-3 p-3 rounded-lg transition
-                      {{ request()->routeIs('technician.work-history') ? 'bg-white text-blue-900 font-semibold' : 'text-white hover:bg-blue-800' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                class="flex items-center space-x-2 p-2 rounded-l-lg transition duration-150 
+                          hover:bg-gray-300 hover:text-blue-900 
+                          {{ request()->routeIs('technician.work-history') ? 'bg-gray-300 text-blue-900 font-semibold' : 'text-indigo-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
                     <path
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -77,99 +89,73 @@
                 <span>Work History</span>
             </a>
         </nav>
-
-        <!-- User Profile at Bottom -->
-        <div class="p-4 border-t border-blue-700">
-            <div class="flex items-center gap-3 mb-3">
-                <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('images/default-avatar.png') }}"
-                    alt="{{ Auth::user()->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-white">
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-blue-200">Technician</p>
-                </div>
-            </div>
-
-            <div class="space-y-1">
-                <a href="{{ route('settings.index') }}"
-                    class="block w-full text-left px-3 py-2 text-sm text-white hover:bg-blue-800 rounded transition flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                        </path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Settings
-                </a>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="w-full text-left px-3 py-2 text-sm text-red-300 hover:bg-blue-800 rounded transition flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                            </path>
-                        </svg>
-                        Sign Out
-                    </button>
-                </form>
-            </div>
-        </div>
     </aside>
 
-    <!-- Main Content Wrapper -->
-    <div class="min-h-screen md:ml-64">
-        <!-- Header -->
-        <header class="bg-white p-3 md:p-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
-            <div class="flex items-center gap-2 md:gap-4">
-                <!-- Hamburger Menu (Mobile Only) -->
-                <button id="hamburger-btn" class="md:hidden text-gray-700 p-2 hover:bg-gray-100 rounded">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-                <h1 class="text-lg md:text-xl font-bold text-gray-800">Technician Portal</h1>
-            </div>
+    <!-- Main Content -->
+    <div class="flex-grow flex flex-col h-full md:ml-48">
 
-            <div class="flex items-center gap-2 md:gap-4">
+        <!-- Header -->
+        <header class="bg-white p-3 flex items-center justify-between md:justify-end shadow-md z-10">
+
+            <!-- Hamburger Menu (Mobile Only) -->
+            <button id="hamburger-btn" class="md:hidden text-gray-700 p-2 hover:bg-gray-100 rounded">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2">
+
+                <!-- Dashboard Icon -->
+                <a href="{{ route('technician.dashboard') }}"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
+                    </svg>
+                </a>
+
                 <!-- Notifications -->
                 <div id="notification-container" class="relative">
                     <button id="notification-bell-btn"
-                        class="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg hover:bg-gray-100 transition relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none"
+                        class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-300 transition relative z-30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" />
                         </svg>
+
                         @if(isset($notificationCount) && $notificationCount > 0)
-                        <span
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                        <span id="notification-count"
+                            class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                             {{ $notificationCount }}
                         </span>
                         @endif
                     </button>
 
-                    <!-- Notification Dropdown -->
+                    <!-- Notification Popup -->
                     <div id="notification-popup"
-                        class="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-300 hidden z-50 origin-top-right transition-all">
+                        class="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-300 hidden z-40 origin-top-right scale-95 opacity-0 transition-all duration-200">
                         <div
-                            class="p-3 md:p-4 border-b border-gray-300 flex justify-between items-center bg-gray-50 rounded-t-xl">
-                            <h5 class="text-sm md:text-base font-semibold text-gray-700">Notifications</h5>
+                            class="p-4 border-b border-gray-300 flex justify-between items-center bg-gray-50 rounded-t-xl">
+                            <h5 class="text-base font-semibold text-gray-700">Notifications</h5>
                             @if(isset($notificationCount) && $notificationCount > 0)
-                            <span class="text-xs text-red-500 font-medium">{{ $notificationCount }} New</span>
+                            <form action="{{ route('notifications.markAllRead') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="text-xs text-blue-600 hover:underline">Mark all as
+                                    read</button>
+                            </form>
                             @endif
                         </div>
 
-                        <div class="max-h-80 md:max-h-96 overflow-y-auto divide-y divide-gray-200">
+                        <div class="max-h-96 overflow-y-auto">
                             @if(isset($notifications) && $notifications->count() > 0)
                             @foreach($notifications as $notification)
-                            <a href="{{ $notification->link ?? '#' }}"
-                                onclick="markAsRead(event, {{ $notification->id }})"
-                                class="block p-3 hover:bg-gray-50 transition">
+                            <a href="{{ $notification->link }}" onclick="markAsRead(event, {{ $notification->id }})"
+                                class="block p-3 hover:bg-gray-50 border-b border-gray-100 transition">
                                 <div class="flex items-start gap-2">
-                                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                    <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-800">{{ $notification->title }}</p>
                                         <p class="text-xs text-gray-600 mt-1">{{ $notification->message }}</p>
@@ -187,35 +173,56 @@
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9">
                                     </path>
                                 </svg>
-                                <p class="text-sm">No notifications</p>
+                                <p class="text-sm">No new notifications</p>
                             </div>
                             @endif
                         </div>
 
-                        @if(isset($notifications) && $notifications->count() > 0)
                         <div class="p-2 border-t border-gray-200 text-center bg-gray-50 rounded-b-xl">
                             <a href="{{ route('technician.notifications.index') }}"
                                 class="text-xs font-medium text-blue-900 hover:text-blue-700">
                                 View All Notifications
                             </a>
                         </div>
-                        @endif
                     </div>
                 </div>
 
-                <!-- Current Date/Time (Hidden on mobile) -->
-                <div class="hidden md:block text-sm text-gray-600">
-                    {{ now()->format('l, M d, Y') }}
+
+                <!-- User Menu -->
+                <div class="relative">
+                    <button id="userMenuButton"
+                        class="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100 text-[12px]">
+                        <div
+                            class="w-6 h-6 bg-blue-600 text-white flex items-center justify-center rounded-full font-bold text-[10px]">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                        <span class="hidden sm:inline">{{ Auth::user()->name }}</span>
+                    </button>
+                    <div id="userDropdownMenu"
+                        class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-md border hidden z-50">
+                        <a href="{{ route('settings.index') }}"
+                            class="w-full text-left flex items-center px-3 py-2 hover:bg-gray-100 text-[12px]">Settings</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="w-full text-left flex items-center px-3 py-2 text-red-500 hover:bg-gray-100 text-[12px]">Sign
+                                out</button>
+                        </form>
+                    </div>
                 </div>
+
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main>
-            @yield('content')
+        <!-- Main Content -->
+        <main class="flex-grow overflow-y-auto">
+            <div>
+                @yield('content')
+            </div>
         </main>
     </div>
 
+    <!-- Scripts -->
     <script>
         // Mobile Sidebar Toggle
         const hamburgerBtn = document.getElementById('hamburger-btn');
@@ -226,13 +233,11 @@
         function openSidebar() {
             sidebar.classList.remove('-translate-x-full');
             mobileOverlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         }
 
         function closeSidebar() {
             sidebar.classList.add('-translate-x-full');
             mobileOverlay.classList.add('hidden');
-            document.body.style.overflow = '';
         }
 
         if (hamburgerBtn) {
@@ -247,54 +252,13 @@
             mobileOverlay.addEventListener('click', closeSidebar);
         }
 
-        // Close sidebar on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
                 closeSidebar();
             }
         });
 
-        // Notification popup
-        document.addEventListener('DOMContentLoaded', function() {
-            const bellButton = document.getElementById('notification-bell-btn');
-            const popup = document.getElementById('notification-popup');
-            const container = document.getElementById('notification-container');
-
-            if (bellButton && popup) {
-                function closePopup() {
-                    popup.classList.add('hidden');
-                }
-
-                function openPopup() {
-                    popup.classList.remove('hidden');
-                }
-
-                bellButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (popup.classList.contains('hidden')) {
-                        openPopup();
-                    } else {
-                        closePopup();
-                    }
-                });
-
-                // Close when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!popup.classList.contains('hidden') && !container.contains(e.target)) {
-                        closePopup();
-                    }
-                });
-
-                // Close on escape key
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
-                        closePopup();
-                    }
-                });
-            }
-        });
-
-        // Mark notification as read
+        // Notifications
         function markAsRead(event, notificationId) {
             fetch(`/technician/notifications/${notificationId}/mark-read`, {
                 method: 'POST',
@@ -304,7 +268,7 @@
                 }
             }).then(response => {
                 if (response.ok) {
-                    const countElement = document.querySelector('#notification-bell-btn span');
+                    const countElement = document.getElementById('notification-count');
                     if (countElement) {
                         let count = parseInt(countElement.textContent);
                         count = Math.max(0, count - 1);
@@ -317,7 +281,64 @@
                 }
             });
         }
+
+        const bellBtn = document.getElementById('notification-bell-btn');
+        const popup = document.getElementById('notification-popup');
+        const container = document.getElementById('notification-container');
+
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(popup.classList.contains('hidden')) {
+                popup.classList.remove('hidden');
+                void popup.offsetWidth; 
+                popup.classList.add('scale-100', 'opacity-100');
+                popup.classList.remove('scale-95', 'opacity-0');
+            } else {
+                popup.classList.add('scale-95', 'opacity-0');
+                popup.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => { popup.classList.add('hidden'); }, 200);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!popup.classList.contains('hidden') && !container.contains(e.target)) {
+                popup.classList.add('scale-95', 'opacity-0');
+                popup.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => { popup.classList.add('hidden'); }, 200);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                popup.classList.add('scale-95', 'opacity-0');
+                popup.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => { popup.classList.add('hidden'); }, 200);
+            }
+        });
+
+        const userMenuButton = document.getElementById('userMenuButton');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+        if (userMenuButton && userDropdownMenu) {
+            userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !userDropdownMenu.classList.contains('hidden')) {
+                    userDropdownMenu.classList.add('hidden');
+                }
+            });
+        }
     </script>
+
 </body>
 
 </html>
